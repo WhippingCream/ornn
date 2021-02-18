@@ -86,10 +86,10 @@
     "moduleNameMapper": {
       "@db/(.*)": "<rootDir>/libs/database/src/$1",
       "@db": "<rootDir>/libs/database/src",
-      "@kakao-bot/(.*)": "<rootDir>/libs/kakao-bot/src/$1",
-      "@kakao-bot": "<rootDir>/libs/kakao-bot/src",
-      "@discord-bot/(.*)": "<rootDir>/libs/discord-bot/src/$1",
-      "@discord-bot": "<rootDir>/libs/discord-bot/src",
+      "@kakao/(.*)": "<rootDir>/libs/kakao/src/$1",
+      "@kakao": "<rootDir>/libs/kakao/src",
+      "@discord/(.*)": "<rootDir>/libs/discord/src/$1",
+      "@discord": "<rootDir>/libs/discord/src",
       "@utils/(.*)": "<rootDir>/libs/utils/src/$1",
       "@utils": "<rootDir>/libs/utils/src"
     }

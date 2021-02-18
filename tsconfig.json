@@ -18,17 +18,17 @@
       "@db/*": [
         "libs/database/src/*"
       ],
-      "kakao-bot": [
-        "libs/kakao-bot/src"
+      "@kakao": [
+        "libs/kakao/src"
       ],
-      "kakao-bot/*": [
-        "libs/kakao-bot/src/*"
+      "@kakao/*": [
+        "libs/kakao/src/*"
       ],
-      "@discord-bot": [
-        "libs/discord-bot/src"
+      "@discord": [
+        "libs/discord/src"
       ],
-      "@discord-bot/*": [
-        "libs/discord-bot/src/*"
+      "@discord/*": [
+        "libs/discord/src/*"
       ],
       "@utils": [
         "libs/utils/src"
