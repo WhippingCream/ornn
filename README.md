@@ -1,33 +1,60 @@
+# Ornn
+
+LOL Community Management Bot Service for Whipping Cream
+
 ## Description
+
+Kakaotalk bot + API Server
 
 ## Installation
 
 ```bash
-$ npm install
+$ yarn
 ```
 
 ## Running the app
 
 ```bash
 # development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
+$ yarn start
 
 # production mode
-$ npm run start:prod
+$ yarn start:prod
+```
+
+## Register Device on Kakaotalk Server
+
+```bash
+$ yarn device:register
 ```
 
 ## Test
 
 ```bash
 # unit tests
-$ npm run test
+$ yarn test
 
 # e2e tests
-$ npm run test:e2e
+$ yarn test:e2e
 
 # test coverage
-$ npm run test:cov
+$ yarn test:cov
 ```
+
+## Built With
+
+- [NestJS](https://expressjs.com/en/starter/installing.html)
+- [TypeORM](https://expressjs.com/en/starter/installing.html)
+
+## Chat Integration
+
+- [KakaoTalk](https://github.com/storycraft/node-kakao)
+- [Discord](https://github.com/discordjs/discord.js)
+
+## Authors
+
+- [8eatles](https://8eatles.github.io)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
