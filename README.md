@@ -9,7 +9,11 @@ Kakaotalk bot + API Server
 ## Installation
 
 ```bash
+# install npm package
 $ yarn
+
+# create development environment file (set your database config)
+$ cp .env/default.env .env/development.env
 ```
 
 ## Running the app
