@@ -1,0 +1,66 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/api-server/src",
+  "monorepo": true,
+  "root": "apps/api-server",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/api-server/tsconfig.app.json"
+  },
+  "projects": {
+    "api-server": {
+      "type": "application",
+      "root": "apps/api-server",
+      "entryFile": "main",
+      "sourceRoot": "apps/api-server/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api-server/tsconfig.app.json"
+      }
+    },
+    "database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
+      }
+    },
+    "kakaotalk-bot": {
+      "type": "library",
+      "root": "libs/kakaotalk-bot",
+      "entryFile": "index",
+      "sourceRoot": "libs/kakaotalk-bot/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/kakaotalk-bot/tsconfig.lib.json"
+      }
+    },
+    "discord-bot": {
+      "type": "library",
+      "root": "libs/discord-bot",
+      "entryFile": "index",
+      "sourceRoot": "libs/discord-bot/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/discord-bot/tsconfig.lib.json"
+      }
+    },
+    "utils": {
+      "type": "library",
+      "root": "libs/utils",
+      "entryFile": "index",
+      "sourceRoot": "libs/utils/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/utils/tsconfig.lib.json"
+      }
+    },
+    "kakao-register": {
+      "type": "application",
+      "root": "apps/kakao-register",
+      "entryFile": "main",
+      "sourceRoot": "apps/kakao-register/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/kakao-register/tsconfig.app.json"
+      }
+    }
+  }
+}

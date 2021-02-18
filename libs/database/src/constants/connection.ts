@@ -1,0 +1,3 @@
+export enum CONNECTION {
+  DEFAULT_NAME = 'DEFAULT',
+}
