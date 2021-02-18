@@ -26,7 +26,7 @@ async function run() {
   try {
     await axios({
       method: 'put',
-      url: 'http://localhost:3000/api/v1/kakao/credentials/_request-passcord',
+      url: 'http://localhost:3000/api/v1/kakao/auth/request-passcord',
     });
   } catch (err) {
     console.error(err);
@@ -39,7 +39,7 @@ async function run() {
   try {
     await axios({
       method: 'put',
-      url: 'http://localhost:3000/api/v1/kakao/credentials/_register-device',
+      url: 'http://localhost:3000/api/v1/kakao/auth/register-device',
       data: {
         passcord,
       },
@@ -52,7 +52,7 @@ async function run() {
   try {
     await axios({
       method: 'put',
-      url: 'http://localhost:3000/api/v1/kakao/credentials/_login',
+      url: 'http://localhost:3000/api/v1/kakao/talk/login',
     });
   } catch (err) {
     console.error(err);
