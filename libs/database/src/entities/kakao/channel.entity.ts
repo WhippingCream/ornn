@@ -1,6 +1,7 @@
 import { ModelBaseEntity } from '@db/base/base.entity';
 import { LENGTH } from '@db/constants/length';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { GroupEntity } from '../group.entity';
 
 import { KakaoUserEntity } from './user.entity';
 
@@ -8,6 +9,7 @@ import { KakaoUserEntity } from './user.entity';
   name: 'kakao_channels',
 })
 export class KakaoChannelEntity extends ModelBaseEntity {
+  // bigint는 string 써야함
   @Column({ type: 'bigint', unique: true })
   kakaoId: number;
 
@@ -31,4 +33,8 @@ export class KakaoChannelEntity extends ModelBaseEntity {
 
   @OneToMany(() => KakaoUserEntity, (user) => user.channel)
   users?: KakaoUserEntity[];
+
+  @OneToOne(() => GroupEntity, (group) => group.kakaoChannel)
+  @JoinColumn({ name: 'groupId' })
+  group: GroupEntity;
 }

@@ -1640,7 +1640,7 @@ bser@2.1.1:
   dependencies:
     node-int64 "^0.4.0"
 
-bson@^4.0.2:
+bson@^4.2.2:
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/bson/-/bson-4.2.2.tgz#ac01bb32b8ab30839550b98e0f44fced931df75d"
   integrity sha512-9fX257PVHAUpiRGmY3356RVWKQxLA73BgjA/x5MGuJkTEMeG7yzjuBrsiFB67EXRJnFVKrbJY9t/M+oElKYktQ==
@@ -2484,6 +2484,11 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
 
+eventemitter3@^4.0.7:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
+  integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
+
 events@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.2.0.tgz#93b87c18f8efcd4202a461aec4dfc0556b639379"
@@ -2812,6 +2817,15 @@ form-data@^3.0.0:
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
 
+form-data@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.0.tgz#93919daeaf361ee529584b9b31664dc12c9fa452"
+  integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
+    mime-types "^2.1.12"
+
 form-data@~2.3.2:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.3.3.tgz#dcce52c05f644f298c6a7ab936bd724ceffbf3a6"
@@ -3044,6 +3058,11 @@ has@^1.0.3:
   integrity sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==
   dependencies:
     function-bind "^1.1.1"
+
+hash-wasm@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/hash-wasm/-/hash-wasm-4.4.1.tgz#9b09b728ab17c2f312639c044ac6f4f98496a090"
+  integrity sha512-6hbcJY74kQQOAoDQZgm0rku51jlf0f3+g+q+1CI3vNvabF27SQuVJm86FnMNMaw8WEjBeW4U5GWX1KsKd8qZCw==
 
 highlight.js@^10.0.0:
   version "10.6.0"
@@ -3896,11 +3915,6 @@ json-parse-even-better-errors@^2.3.0:
   resolved "https://registry.yarnpkg.com/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz#7c47805a94319928e05777405dc12e1f7a4ee02d"
   integrity sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==
 
-json-proxy-mapper@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/json-proxy-mapper/-/json-proxy-mapper-1.1.2.tgz#93a05d3775291e39422155e0620b838635c1950a"
-  integrity sha512-Dyq/otuTN/DqdiOlYTUZqdi23lpye12EkyLbxW9bB08Vibv20529dcTfvLvXy8D5iOhL4e8AkH0GuKo3wINz8Q==
-
 json-schema-traverse@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"
@@ -4367,21 +4381,28 @@ node-fetch@^2.6.1:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
+node-forge@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.10.0.tgz#32dea2afb3e9926f02ee5ce8794902691a676bf3"
+  integrity sha512-PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==
+
 node-int64@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
   integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
-node-kakao@^3.1.10:
-  version "3.1.10"
-  resolved "https://registry.yarnpkg.com/node-kakao/-/node-kakao-3.1.10.tgz#2e87e9d019eff2f4579d89f4d5c2d1ac223d0163"
-  integrity sha512-wNqIqGjnjnq3dWlJcX3iIi+r2JrWZQZfK14YtFBZM5bbSuJpLM9xhvDZ82S2iYQWosKGPwD51MLLvJr5ENKj/w==
+node-kakao@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/node-kakao/-/node-kakao-4.0.0.tgz#e1aa93e8f374ded02869a7e208d649504ab9bb56"
+  integrity sha512-8hBu1Tuor8nbLxH5hOjFC/U5H/MkdlqovW9JmkTVhD8Nvau4sY5youe1AEXM2qnQTDuGeC6XTV8TrKn0Y4SMRQ==
   dependencies:
     axios "^0.21.1"
-    bson "^4.0.2"
-    form-data "^3.0.0"
-    json-proxy-mapper "^1.1.2"
+    bson "^4.2.2"
+    eventemitter3 "^4.0.7"
+    form-data "^4.0.0"
+    hash-wasm "^4.4.1"
     lossless-json "^1.0.3"
+    node-forge "^0.10.0"
 
 node-modules-regexp@^1.0.0:
   version "1.0.0"

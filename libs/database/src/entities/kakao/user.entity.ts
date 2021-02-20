@@ -1,6 +1,7 @@
 import { ModelBaseEntity } from '@db/base/base.entity';
 import { LENGTH } from '@db/constants/length';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { UserEntity } from '../user.entity';
 
 import { KakaoChannelEntity } from './channel.entity';
 
@@ -8,6 +9,7 @@ import { KakaoChannelEntity } from './channel.entity';
   name: 'kakao_users',
 })
 export class KakaoUserEntity extends ModelBaseEntity {
+  // bigint는 string 써야함
   @Column({
     type: 'bigint',
     unique: true,
@@ -18,7 +20,7 @@ export class KakaoUserEntity extends ModelBaseEntity {
     type: 'varchar',
     length: LENGTH.SHORT_STRING,
   })
-  nickName: string;
+  name: string;
 
   @Column({
     type: 'varchar',
@@ -28,4 +30,8 @@ export class KakaoUserEntity extends ModelBaseEntity {
 
   @ManyToOne(() => KakaoChannelEntity, (channel) => channel.users)
   channel: KakaoChannelEntity;
+
+  @OneToOne(() => UserEntity, (user) => user.kakaoUser)
+  @JoinColumn({ name: 'userId' })
+  user: UserEntity;
 }

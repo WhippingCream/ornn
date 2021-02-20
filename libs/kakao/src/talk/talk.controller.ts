@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { encode } from 'js-base64';
-import { Chat, ChatMention, TalkClient } from 'node-kakao';
+import { AuthApiClient } from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
 import { KakaoTalkService } from './talk.service';
 
@@ -37,51 +37,33 @@ export class KakaoTalkController extends ModelBaseController {
       });
     }
 
-    if (!this.talkService.client) {
-      this.talkService.client = new TalkClient(clientName, encode(deviceId));
-    }
+    const api = await AuthApiClient.create(clientName, encode(deviceId));
+    const loginRes = await api.login({
+      email,
+      password,
 
-    if (this.talkService.client.Logon) {
+      // This option force login even other devices are logon
+      forced: true,
+    });
+
+    if (this.talkService.client.logon) {
       throw new BadRequestException({
         message: 'Already logged on',
       });
     }
 
-    try {
-      await this.talkService.client.login(email, password);
-      this.talkService.client.on('message', (chat: Chat) => {
-        const userInfo = chat.Channel.getUserInfo(chat.Sender);
-        if (!userInfo) return;
-        if (chat.Text === '켜졌냐?') {
-          chat.replyText('켜졌다! ', new ChatMention(userInfo));
-        }
-      });
-    } catch (err) {
-      throw new InternalServerErrorException({
-        message: 'register device failed',
-        err,
-      });
-    }
-  }
-
-  @Put('logout')
-  async logout(): Promise<void> {
-    const { email, password } = await this.credentialService.getOne(1);
-
-    if (!email || !password) {
-      throw new ForbiddenException({
-        message: 'Email and password is not existed',
-      });
-    }
-
-    if (!this.talkService.client || !this.talkService.client.Logon) {
-      throw new BadRequestException({
-        message: 'Not logged on yet',
-      });
+    if (!loginRes.success) {
+      throw new BadRequestException(
+        `Web login failed with status: ${loginRes.status}`,
+      );
     }
 
     try {
-      await this.talkService.client.logout();
+      const res = await this.talkService.client.login(loginRes.result);
+
+      if (!res.success) {
+        throw new Error(`Login failed with status: ${res.status}`);
+      }
     } catch (err) {
       throw new InternalServerErrorException({
         message: 'register device failed',

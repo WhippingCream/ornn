@@ -1,4 +1,4 @@
-import { EnumParameter, IntegerParameter, StringParameter } from '@utils';
+import { IntegerParameter, StringParameter } from '@utils';
 import { ChannelType } from 'node-kakao';
 
 import { IKakaoChannel } from '../channels.interface';
@@ -10,7 +10,7 @@ export class UpdateKakaoChannelDto implements Partial<IKakaoChannel> {
   })
   kakaoId?: number;
 
-  @EnumParameter(ChannelType, {
+  @StringParameter({
     required: false,
     description:
       '카카오톡 채팅방 종류\n- UNKNOWN: 알 수 없음\n- MultiChat: 그룹 채팅\n- DirectChat: 1:1 채팅\n- PlusChat: 플러스 친구 채팅\n- MemoChat: Self 채팅\n- OM: 오픈톡 그룹 채팅\n- OD: 오픈 프로필 채팅',

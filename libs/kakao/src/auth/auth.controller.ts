@@ -1,5 +1,6 @@
 import { ModelBaseController } from '@db/base/base.controller';
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -8,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { encode } from 'js-base64';
-import { AuthClient, DefaultConfiguration } from 'node-kakao';
+import { AuthApiClient, KnownAuthStatusCode } from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
 import { KakaoAuthService } from './auth.service';
 import { KakaoRegisterDeviceDto } from './dto/register-device.dto';
@@ -40,11 +41,41 @@ export class KakaoAuthController extends ModelBaseController {
 
     try {
       if (!this.authService.client) {
-        this.authService.client = new AuthClient(clientName, encode(deviceId), {
-          Configuration: DefaultConfiguration,
-        });
+        this.authService.client = await AuthApiClient.create(
+          clientName,
+          encode(deviceId),
+        );
       }
-      this.authService.client.requestPasscode(email, password);
+
+      const loginForm = {
+        email,
+        password,
+        forced: true,
+      };
+
+      const loginRes = await this.authService.client.login(loginForm);
+
+      if (loginRes.success) {
+        throw new BadRequestException('Device already registered!');
+      }
+
+      if (loginRes.status !== KnownAuthStatusCode.DEVICE_NOT_REGISTERED) {
+        throw new BadRequestException(
+          `Web login failed with status: ${loginRes.status}`,
+        );
+      }
+
+      const passcodeRes = await this.authService.client.requestPasscode(
+        loginForm,
+      );
+
+      if (!passcodeRes.success) {
+        throw new InternalServerErrorException(
+          `Passcode request failed with status: ${passcodeRes.status}`,
+        );
+      }
+
+      this.authService.client.requestPasscode(loginForm);
     } catch (err) {
       throw new InternalServerErrorException({
         message: 'request passcord failed',
@@ -72,16 +103,29 @@ export class KakaoAuthController extends ModelBaseController {
 
     try {
       if (!this.authService.client) {
-        this.authService.client = new AuthClient(clientName, encode(deviceId), {
-          Configuration: DefaultConfiguration,
-        });
+        this.authService.client = await AuthApiClient.create(
+          clientName,
+          deviceId,
+        );
       }
-      await this.authService.client.registerDevice(
-        passcord,
+
+      const loginForm = {
         email,
         password,
+        forced: true,
+      };
+
+      const res = await this.authService.client.registerDevice(
+        loginForm,
+        passcord,
         true,
       );
+
+      if (!res.success) {
+        throw new BadRequestException(
+          `Device registration failed with status: ${res.status}`,
+        );
+      }
     } catch (err) {
       throw new InternalServerErrorException({
         message: 'register device failed',
