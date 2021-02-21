@@ -3,13 +3,18 @@ import {
   BadRequestException,
   Controller,
   ForbiddenException,
+  Get,
   InternalServerErrorException,
   Put,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { encode } from 'js-base64';
-import { AuthApiClient } from 'node-kakao';
+import { AuthApiClient, TalkOpenChannel } from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
+import {
+  GetKakaoStatusResponseDto,
+  SimpleChannelDto,
+} from './dto/get.status.response.dto';
 import { KakaoTalkService } from './talk.service';
 
 @ApiTags('카카오 톡 기능 v1')
@@ -20,6 +25,50 @@ export class KakaoTalkController extends ModelBaseController {
     protected talkService: KakaoTalkService,
   ) {
     super();
+  }
+
+  @Get('status')
+  async getStatus(): Promise<GetKakaoStatusResponseDto> {
+    const { logon } = this.talkService.client;
+
+    if (logon) {
+      const { channelList } = this.talkService.client;
+      const channels: SimpleChannelDto[] = [];
+
+      for (const channel of channelList.all()) {
+        if (channel.info.type === 'OM') {
+          const _channel = channelList.get(channel.channelId);
+
+          if (_channel instanceof TalkOpenChannel) {
+            const {
+              channelId,
+              activeUserCount,
+              displayUserList,
+              openLink: { linkId, linkName, linkURL, searchable },
+            } = _channel.info;
+
+            const userList = displayUserList.map(({ userId, nickname }) => ({
+              id: userId.toString(),
+              nickname,
+            }));
+
+            channels.push({
+              id: channelId.toString(),
+              activeUserCount,
+              linkId: linkId.toString(),
+              linkName,
+              linkURL,
+              searchable,
+              userList,
+            });
+          }
+        }
+      }
+
+      return { logon, channels };
+    }
+
+    return { logon };
   }
 
   @Put('login')
