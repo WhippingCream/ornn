@@ -18,7 +18,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/ornn/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/ornn/test/jest-e2e.json",
+    "docker:build": "docker build . -t ornn",
+    "docker:run": "docker run --rm --env-file .envs/docker.env -p 3000:3000 ornn"
   },
   "dependencies": {
     "@nestjs/common": "^7.5.1",
