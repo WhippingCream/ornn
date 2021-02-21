@@ -5,11 +5,34 @@ import {
   ForbiddenException,
   Get,
   InternalServerErrorException,
+  Logger,
   Put,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { encode } from 'js-base64';
-import { AuthApiClient, TalkOpenChannel } from 'node-kakao';
+import {
+  AsyncCommandResult,
+  AuthApiClient,
+  LoginResult,
+  ChannelUserInfo,
+  ChatFeeds,
+  ChatLoggedType,
+  DeleteAllFeed,
+  InformedOpenLink,
+  KnownChatType,
+  OpenChannelUserInfo,
+  OpenChannelUserPerm,
+  OpenKickFeed,
+  OpenLink,
+  OpenLinkChannelUserInfo,
+  OpenLinkDeletedFeed,
+  OpenRewriteFeed,
+  SetChannelMeta,
+  TalkChannel,
+  TalkChatData,
+  TalkOpenChannel,
+  TypedChatlog,
+} from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
 import {
   GetKakaoStatusResponseDto,
@@ -25,6 +48,296 @@ export class KakaoTalkController extends ModelBaseController {
     protected talkService: KakaoTalkService,
   ) {
     super();
+
+    this.talkService.client.on(
+      'chat',
+      (data: TalkChatData, channel: TalkChannel): void => {
+        const sender = data.getSenderInfo(channel);
+        if (!sender) return;
+
+        let isStaff = false;
+
+        if (channel.info.type === 'OM') {
+          const _channel = this.talkService.client.channelList.get(
+            channel.channelId,
+          );
+          if (_channel instanceof TalkOpenChannel) {
+            const openUserInfo = _channel.getUserInfo(data.chat.sender);
+            if (
+              openUserInfo.perm === OpenChannelUserPerm.MANAGER ||
+              openUserInfo.perm === OpenChannelUserPerm.OWNER
+            ) {
+              isStaff = true;
+            }
+          }
+        }
+
+        Logger.debug(
+          [
+            '[Kakao] channel: ',
+            channel.info.channelId,
+            channel.info.type,
+            channel.getDisplayName(),
+          ].join(' '),
+        );
+        Logger.debug(
+          [
+            '[Kakao] sender: ',
+            sender.userId,
+            sender.userType,
+            sender.nickname,
+          ].join(' '),
+        );
+        Logger.debug(
+          [
+            '[Kakao] chat: ',
+            data.chat.type,
+            data.chat.messageId,
+            data.chat.text,
+          ].join(' '),
+        );
+        Logger.debug(
+          [
+            '[Kakao] attachment: ',
+            data.chat.attachment.mentions,
+            data.chat.supplement,
+          ].join(' '),
+        );
+
+        if (data.text === '!staff') {
+          channel.sendChat(isStaff ? '운영진입니다.' : '일반 유저 입니다.');
+        }
+
+        // if (
+        //   data.originalType === KnownChatType.REPLY &&
+        //   data.text === '!readers'
+        // ) {
+        //   const reply = data.attachment<ReplyAttachment>();
+        //   const logId = reply.src_logId;
+        //   if (logId) {
+        //     const readers = channel.getReaders({ logId });
+        //     channel.sendChat(
+        //       `${logId} 읽은 사람 (${readers.length})\n${readers
+        //         .map((reader) => reader.nickname)
+        //         .join(', ')}`,
+        //     );
+        //   }
+        // }
+      },
+    );
+
+    this.talkService.client.on('error', (err: unknown): void => {
+      Logger.error(`[Kakao] Client error!! err: ${err}`);
+    });
+
+    this.talkService.client.on('switch_server', (): void => {
+      Logger.log('[Kakao] Server switching requested.');
+      this._login()
+        .then((result) => {
+          if (result.success) {
+            Logger.log('[Kakao] Success to auto login!');
+          }
+        })
+        .catch((reason) => {
+          Logger.warn(`[Kakao] Fail to auto login(${reason})!`);
+        });
+    });
+
+    this.talkService.client.on('disconnected', (reason: number): void => {
+      Logger.error(`[Kakao] Disconnected!! reason: ${reason}`);
+      this._login()
+        .then((result) => {
+          if (result.success) {
+            Logger.log('[Kakao] Success to auto login!');
+          }
+        })
+        .catch((reason) => {
+          Logger.warn(`[Kakao] Fail to auto login(${reason})!`);
+        });
+    });
+
+    this.talkService.client.on(
+      'chat_deleted',
+      (
+        feedChatlog: Readonly<TypedChatlog<KnownChatType.FEED>>,
+        channel: TalkChannel,
+        feed: DeleteAllFeed,
+      ): void => {
+        Logger.log(
+          `[Kakao] ${feed.logId} deleted by ${feedChatlog.sender.userId}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'link_created',
+      (link: InformedOpenLink): void => {
+        Logger.log(
+          `[Kakao] Link created: ${link.openLink.linkId} url: ${link.openLink.linkURL}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'link_deleted',
+      (link: InformedOpenLink): void => {
+        Logger.log(
+          `[Kakao] Link deleted: ${link.openLink.linkId} url: ${link.openLink.linkURL}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'user_join',
+      (
+        joinLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
+        channel: TalkChannel,
+        user: ChannelUserInfo,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        feed: ChatFeeds,
+      ): void => {
+        Logger.log(
+          `[Kakao] User ${user.nickname} (${user.userId}) joined channel ${channel.channelId}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'user_left',
+      (
+        leftLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
+        channel: TalkChannel,
+        user: ChannelUserInfo,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        feed: ChatFeeds,
+      ): void => {
+        Logger.log(
+          `[Kakao] User ${user.nickname} (${user.userId}) left channel ${channel.channelId}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'profile_changed',
+      (
+        channel: TalkOpenChannel,
+        lastInfo: OpenChannelUserInfo,
+        user: OpenLinkChannelUserInfo,
+      ): void => {
+        Logger.log(
+          `[Kakao] Profile of ${user.userId} changed. From name: ${lastInfo.nickname} profile: ${lastInfo.profileURL}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'perm_changed',
+      (
+        channel: TalkOpenChannel,
+        lastInfo: OpenChannelUserInfo,
+        user: OpenChannelUserInfo,
+      ): void => {
+        Logger.log(
+          `[Kakao] Perm of ${user.userId} changed. From ${lastInfo.perm} to ${user.perm}`,
+        );
+      },
+    );
+
+    this.talkService.client.on('channel_join', (channel: TalkChannel): void => {
+      Logger.log(`[Kakao] Joining channel ${channel.getDisplayName()}`);
+    });
+
+    this.talkService.client.on('channel_left', (channel: TalkChannel): void => {
+      Logger.log(`[Kakao] Leaving channel ${channel.getDisplayName()}`);
+    });
+
+    this.talkService.client.on(
+      'message_hidden',
+      (
+        hideLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
+        channel: TalkOpenChannel,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        feed: OpenRewriteFeed,
+      ): void => {
+        Logger.log(
+          `[Kakao] Message ${hideLog.logId} hid from ${channel.channelId} by ${hideLog.sender.userId}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'channel_link_deleted',
+      (
+        feedLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
+        channel: TalkOpenChannel,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        feed: OpenLinkDeletedFeed,
+      ): void => {
+        Logger.log(
+          `[Kakao] Open channel (${channel.channelId}) link has been deleted`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'host_handover',
+      (channel: TalkOpenChannel, lastLink: OpenLink, link: OpenLink): void => {
+        const lastOwnerNick = lastLink.linkOwner.nickname;
+        const newOwnerNick = link.linkOwner.nickname;
+
+        Logger.log(
+          `[Kakao] OpenLink host handover on channel ${channel.channelId} from ${lastOwnerNick} to ${newOwnerNick}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'channel_kicked',
+      (
+        kickedLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
+        channel: TalkOpenChannel,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        feed: OpenKickFeed,
+      ): void => {
+        Logger.log(`[Kakao] Kicked from channel ${channel.channelId}`);
+      },
+    );
+    this.talkService.client.on(
+      'meta_change',
+      (
+        channel: TalkOpenChannel,
+        type: number,
+        newMeta: SetChannelMeta,
+      ): void => {
+        Logger.log(
+          `[Kakao] Meta changed from ${channel.channelId} type: ${type} meta: ${newMeta.content} by ${newMeta.authorId}`,
+        );
+      },
+    );
+
+    this.talkService.client.on(
+      'chat_event',
+      (
+        channel: TalkOpenChannel,
+        author: OpenChannelUserInfo,
+        type: number,
+        count: number,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        chat: ChatLoggedType,
+      ): void => {
+        channel.sendChat(`${author.nickname} touched hearts ${count} times`);
+      },
+    );
+
+    this._login()
+      .then((result) => {
+        if (result.success) {
+          Logger.log('[Kakao] Success to auto login!');
+        }
+      })
+      .catch((reason) => {
+        Logger.warn(`[Kakao] Fail to auto login(${reason})!`);
+      });
   }
 
   @Get('status')
@@ -71,8 +384,7 @@ export class KakaoTalkController extends ModelBaseController {
     return { logon };
   }
 
-  @Put('login')
-  async login(): Promise<void> {
+  async _login(): AsyncCommandResult<LoginResult> {
     const {
       email,
       password,
@@ -95,20 +407,25 @@ export class KakaoTalkController extends ModelBaseController {
       forced: true,
     });
 
-    if (this.talkService.client.logon) {
-      throw new BadRequestException({
-        message: 'Already logged on',
-      });
-    }
-
     if (!loginRes.success) {
       throw new BadRequestException(
         `Web login failed with status: ${loginRes.status}`,
       );
     }
 
+    return await this.talkService.client.login(loginRes.result);
+  }
+
+  @Put('login')
+  async login(): Promise<void> {
+    if (this.talkService.client.logon) {
+      throw new BadRequestException({
+        message: 'Already logged on',
+      });
+    }
+
     try {
-      const res = await this.talkService.client.login(loginRes.result);
+      const res = await this._login();
 
       if (!res.success) {
         throw new Error(`Login failed with status: ${res.status}`);
