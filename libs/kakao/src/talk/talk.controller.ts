@@ -1,6 +1,7 @@
 import { ModelBaseController } from '@db/base/base.controller';
 import {
   BadRequestException,
+  Body,
   Controller,
   ForbiddenException,
   Get,
@@ -32,12 +33,16 @@ import {
   TalkChatData,
   TalkOpenChannel,
   TypedChatlog,
+  Long,
+  ChatBuilder,
+  MentionContent,
 } from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
 import {
   GetKakaoStatusResponseDto,
   SimpleChannelDto,
 } from './dto/get.status.response.dto';
+import { SendMessageDto } from './dto/send.message.dto';
 import { KakaoTalkService } from './talk.service';
 
 @ApiTags('카카오 톡 기능 v1')
@@ -436,5 +441,32 @@ export class KakaoTalkController extends ModelBaseController {
         err,
       });
     }
+  }
+
+  @Put('message')
+  async message(@Body() dto: SendMessageDto): Promise<void> {
+    const channel = this.talkService.client.channelList.get(
+      Long.fromString(dto.channelId),
+    );
+
+    const chatBuilder = new ChatBuilder();
+
+    dto.tokens.forEach(({ type, content }) => {
+      switch (type) {
+        case 'text': {
+          chatBuilder.text(content);
+          break;
+        }
+        case 'mention': {
+          const userInfo = channel.getUserInfo({
+            userId: Long.fromString(content),
+          });
+
+          chatBuilder.append(new MentionContent(userInfo));
+        }
+      }
+    });
+
+    channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
   }
 }
