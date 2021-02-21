@@ -1,28 +1,30 @@
-FROM node:12 As development
+FROM node:12-alpine3.11 as development
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install --only=development
+RUN yarn install
 
 COPY . .
 
-RUN npm run build
+RUN yarn build
 
-FROM node:12 as production
+FROM node:12-alpine3.11 as production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package.json ./
+COPY yarn.lock ./
 
-RUN npm install --only=production
+RUN yarn install --prod
 
 COPY . .
 
 COPY --from=development /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/api-server/main"]
+
