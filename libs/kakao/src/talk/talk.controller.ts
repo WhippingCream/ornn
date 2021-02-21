@@ -104,7 +104,7 @@ export class KakaoTalkController extends ModelBaseController {
         Logger.debug(
           [
             '[Kakao] attachment: ',
-            data.chat.attachment.mentions,
+            data.chat.attachment?.mentions,
             data.chat.supplement,
           ].join(' '),
         );
