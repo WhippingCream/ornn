@@ -1,1 +1,1 @@
-export * from './kakao.module';
+export * from './modules/kakao.module';

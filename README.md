@@ -32,6 +32,10 @@ $ yarn start:prod
 $ yarn device:register
 ```
 
+## How to add command
+
+[example](https://github.com/WhippingCream/ornn/pull/1/files)
+
 ## Test
 
 ```bash
