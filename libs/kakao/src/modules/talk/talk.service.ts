@@ -63,7 +63,7 @@ export class KakaoTalkService {
     if (spacePosition === -1) {
       command = data.text.substr(1);
     } else {
-      command = data.text.substr(1, spacePosition);
+      command = data.text.substr(1, spacePosition - 1);
       argString = data.text.substr(data.text.indexOf(' ') + 1);
     }
 

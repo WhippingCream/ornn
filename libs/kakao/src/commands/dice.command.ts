@@ -25,7 +25,7 @@ export class DiceCommand extends KakaoCommand {
   execute = (data: TalkChatData, channel: TalkChannel, argString: string) => {
     let max = 6;
 
-    if (typeof argString === 'number' && isFinite(argString)) {
+    if (argString) {
       const arg = Math.floor(parseInt(argString, 10));
       if (arg > 1) {
         max = arg;
@@ -34,30 +34,32 @@ export class DiceCommand extends KakaoCommand {
 
     let result = `${Math.ceil(Math.random() * max)}`;
 
-    switch (result) {
-      case '1': {
-        result = '⚀';
-        break;
-      }
-      case '2': {
-        result = '⚁';
-        break;
-      }
-      case '3': {
-        result = '⚂';
-        break;
-      }
-      case '4': {
-        result = '⚃';
-        break;
-      }
-      case '5': {
-        result = '⚄';
-        break;
-      }
-      case '6': {
-        result = '⚅';
-        break;
+    if (max < 7) {
+      switch (result) {
+        case '1': {
+          result = '⚀';
+          break;
+        }
+        case '2': {
+          result = '⚁';
+          break;
+        }
+        case '3': {
+          result = '⚂';
+          break;
+        }
+        case '4': {
+          result = '⚃';
+          break;
+        }
+        case '5': {
+          result = '⚄';
+          break;
+        }
+        case '6': {
+          result = '⚅';
+          break;
+        }
       }
     }
 
