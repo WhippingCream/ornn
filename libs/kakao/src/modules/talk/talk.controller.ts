@@ -22,7 +22,6 @@ import {
   InformedOpenLink,
   KnownChatType,
   OpenChannelUserInfo,
-  OpenChannelUserPerm,
   OpenKickFeed,
   OpenLink,
   OpenLinkChannelUserInfo,
@@ -56,78 +55,51 @@ export class KakaoTalkController extends ModelBaseController {
 
     this.talkService.client.on(
       'chat',
-      (data: TalkChatData, channel: TalkChannel): void => {
+      async (data: TalkChatData, channel: TalkChannel): Promise<void> => {
         const sender = data.getSenderInfo(channel);
         if (!sender) return;
 
-        let isStaff = false;
-
-        if (channel.info.type === 'OM') {
-          const _channel = this.talkService.client.channelList.get(
-            channel.channelId,
-          );
-          if (_channel instanceof TalkOpenChannel) {
-            const openUserInfo = _channel.getUserInfo(data.chat.sender);
-            if (
-              openUserInfo.perm === OpenChannelUserPerm.MANAGER ||
-              openUserInfo.perm === OpenChannelUserPerm.OWNER
-            ) {
-              isStaff = true;
-            }
+        switch (data.text.charAt(0)) {
+          case '!': {
+            await this.talkService.runCommand(data, channel);
+            break;
+          }
+          case '?': {
+            await this.talkService.showCommandHelp(data, channel);
           }
         }
 
-        Logger.debug(
-          [
-            '[Kakao] channel: ',
-            channel.info.channelId,
-            channel.info.type,
-            channel.getDisplayName(),
-          ].join(' '),
-        );
-        Logger.debug(
-          [
-            '[Kakao] sender: ',
-            sender.userId,
-            sender.userType,
-            sender.nickname,
-          ].join(' '),
-        );
-        Logger.debug(
-          [
-            '[Kakao] chat: ',
-            data.chat.type,
-            data.chat.messageId,
-            data.chat.text,
-          ].join(' '),
-        );
-        Logger.debug(
-          [
-            '[Kakao] attachment: ',
-            data.chat.attachment?.mentions,
-            data.chat.supplement,
-          ].join(' '),
-        );
-
-        if (data.text === '!staff') {
-          channel.sendChat(isStaff ? '운영진입니다.' : '일반 유저 입니다.');
-        }
-
-        // if (
-        //   data.originalType === KnownChatType.REPLY &&
-        //   data.text === '!readers'
-        // ) {
-        //   const reply = data.attachment<ReplyAttachment>();
-        //   const logId = reply.src_logId;
-        //   if (logId) {
-        //     const readers = channel.getReaders({ logId });
-        //     channel.sendChat(
-        //       `${logId} 읽은 사람 (${readers.length})\n${readers
-        //         .map((reader) => reader.nickname)
-        //         .join(', ')}`,
-        //     );
-        //   }
-        // }
+        // Logger.debug(
+        //   [
+        //     '[Kakao] channel: ',
+        //     channel.info.channelId,
+        //     channel.info.type,
+        //     channel.getDisplayName(),
+        //   ].join(' '),
+        // );
+        // Logger.debug(
+        //   [
+        //     '[Kakao] sender: ',
+        //     sender.userId,
+        //     sender.userType,
+        //     sender.nickname,
+        //   ].join(' '),
+        // );
+        // Logger.debug(
+        //   [
+        //     '[Kakao] chat: ',
+        //     data.chat.type,
+        //     data.chat.messageId,
+        //     data.chat.text,
+        //   ].join(' '),
+        // );
+        // Logger.debug(
+        //   [
+        //     '[Kakao] attachment: ',
+        //     data.chat.attachment?.mentions,
+        //     data.chat.supplement,
+        //   ].join(' '),
+        // );
       },
     );
 
