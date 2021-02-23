@@ -35,6 +35,7 @@ import {
   Long,
   ChatBuilder,
   MentionContent,
+  ReplyContent,
 } from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
 import {
@@ -59,13 +60,37 @@ export class KakaoTalkController extends ModelBaseController {
         const sender = data.getSenderInfo(channel);
         if (!sender) return;
 
-        switch (data.text.charAt(0)) {
-          case '!': {
-            await this.talkService.runCommand(data, channel);
-            break;
+        if (data.text.charAt(0) === '/') {
+          const { isHelp, command, args } = this.talkService.parseCommand(
+            data,
+            channel,
+          );
+          if (!command) {
+            return;
           }
-          case '?': {
-            await this.talkService.showCommandHelp(data, channel);
+          if (isHelp) {
+            channel.sendChat(
+              new ChatBuilder()
+                .append(new ReplyContent(data.chat))
+                .text(command ? command.helpMessage : '없는 명령어 입니다.')
+                .build(KnownChatType.REPLY),
+            );
+          } else {
+            let verifiedArgs;
+            try {
+              verifiedArgs = this.talkService.validateCommandArguments(
+                command,
+                args,
+              );
+              command.execute(data, channel, verifiedArgs);
+            } catch (err) {
+              channel.sendChat(
+                new ChatBuilder()
+                  .append(new ReplyContent(data.chat))
+                  .text(`⚠️ ${err.message}`)
+                  .build(KnownChatType.REPLY),
+              );
+            }
           }
         }
 

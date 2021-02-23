@@ -12,7 +12,11 @@ export class CoinFlipCommand extends KakaoCommand {
     super({
       command: 'flip-coin',
       aliases: ['동전던지기', '동전'],
-      helpMessage: '동전 뒤집기 입니다.\n 반반의 확률로 앞면/뒷면이 나옵니다.',
+      helpMessage: [
+        '/동전',
+        ' - 동전 뒤집기 입니다.',
+        ' - 반반의 확률로 앞면/뒷면이 나옵니다.',
+      ].join('\n'),
     });
   }
 

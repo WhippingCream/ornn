@@ -1,9 +1,11 @@
 {
   "cSpell.words": [
     "chatlog",
+    "datetime",
     "dtos",
     "kakao",
     "kakaotalk",
+    "luxon",
     "middlewares",
     "nestjs",
     "ornn",
