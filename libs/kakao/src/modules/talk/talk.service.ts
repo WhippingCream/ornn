@@ -1,11 +1,14 @@
 import { kakaoCommands } from '@kakao/commands';
-import { KakaoCommand, KakaoOpenCommand } from '@kakao/commands/base.command';
-import { Injectable, Logger } from '@nestjs/common';
 import {
-  ChatBuilder,
-  KnownChatType,
+  COMMAND_ARGUMENT_TYPE,
+  KakaoCommand,
+  KakaoOpenCommand,
+} from '@kakao/commands/base.command';
+import { Injectable, Logger } from '@nestjs/common';
+import { converters } from '@utils/converters';
+import { CommonDate, CommonTime } from '@utils/interfaces';
+import {
   OpenChannelUserInfo,
-  ReplyContent,
   TalkChannel,
   TalkChatData,
   TalkClient,
@@ -13,8 +16,9 @@ import {
 } from 'node-kakao';
 
 interface ParsedCommand {
-  commandMeta?: KakaoCommand;
-  argString?: string;
+  isHelp?: boolean;
+  command?: KakaoCommand;
+  args?: string[];
   openUserInfo?: OpenChannelUserInfo;
   openChannel?: TalkOpenChannel;
 }
@@ -55,22 +59,33 @@ export class KakaoTalkService {
 
   parseCommand(data: TalkChatData, channel: TalkChannel): ParsedCommand {
     const spacePosition = data.text.indexOf(' ');
-    let command: string,
-      argString: string,
+    let isHelp = false,
+      commandString: string,
+      args: string[],
       openUserInfo: OpenChannelUserInfo,
       openChannel: TalkOpenChannel;
 
     if (spacePosition === -1) {
-      command = data.text.substr(1);
+      commandString = data.text.substr(1);
     } else {
-      command = data.text.substr(1, spacePosition - 1);
-      argString = data.text.substr(data.text.indexOf(' ') + 1);
+      commandString = data.text.substr(1, spacePosition - 1);
+      args = data.text
+        .substr(data.text.indexOf(' ') + 1)
+        .match(/[A-Za-z0-9가-힣_\.:/-]+|"[^"]+"|'[^']+'/g);
     }
 
-    const commandMeta = this.commandMap.get(command);
+    if (commandString.charAt(commandString.length - 1) === '?') {
+      isHelp = true;
+    }
 
-    if (!commandMeta) {
-      Logger.debug(`no command(${command})`);
+    const command = this.commandMap.get(
+      isHelp
+        ? commandString.substring(0, commandString.length - 1)
+        : commandString,
+    );
+
+    if (!command) {
+      Logger.debug(`no command(${commandString})`);
       return {};
     }
 
@@ -82,42 +97,98 @@ export class KakaoTalkService {
       }
     }
 
-    if (commandMeta instanceof KakaoOpenCommand) {
+    if (command instanceof KakaoOpenCommand) {
       if (!openChannel) {
         Logger.debug('not openChannel');
         return {};
       }
 
-      if (openChannel && !commandMeta.roles.includes(openUserInfo.perm)) {
+      if (openChannel && !command.roles.includes(openUserInfo.perm)) {
         Logger.debug('not have perm');
         return {};
       }
     }
 
     return {
-      commandMeta,
-      argString,
+      isHelp,
+      command,
+      args,
       openUserInfo,
       openChannel,
     };
   }
 
-  runCommand(data: TalkChatData, channel: TalkChannel) {
-    const { commandMeta, argString } = this.parseCommand(data, channel);
-    if (!commandMeta) {
-      return;
-    }
-    return commandMeta.execute(data, channel, argString);
-  }
+  validateCommandArguments(
+    command: KakaoCommand,
+    stringArgs: string[],
+  ): (string | number | boolean | CommonTime | CommonDate)[] {
+    const args: (string | number | boolean | CommonTime | CommonDate)[] = [];
 
-  showCommandHelp(data: TalkChatData, channel: TalkChannel) {
-    const { commandMeta } = this.parseCommand(data, channel);
+    command.argOptions.forEach(
+      ({ type, optional, validationErrorMessage: vem }, index) => {
+        if (!stringArgs[index] && optional) {
+          args.push(null);
+          return;
+        } else if (!stringArgs[index] && !optional) {
+          throw new Error(`${index + 1}번째 인자는 필수입니다.`);
+        }
 
-    return channel.sendChat(
-      new ChatBuilder()
-        .append(new ReplyContent(data.chat))
-        .text(commandMeta ? commandMeta.helpMessage : '없는 명령어 입니다.')
-        .build(KnownChatType.REPLY),
+        // withoutQuotes
+        const stringArg = stringArgs[index].replace(/['"]+/g, '');
+
+        switch (type) {
+          case COMMAND_ARGUMENT_TYPE.STRING: {
+            args.push(stringArg);
+            break;
+          }
+          case COMMAND_ARGUMENT_TYPE.INTEGER: {
+            const result = converters.str2int(stringArg);
+            if (result === null) {
+              throw new Error(vem || `${stringArg} 는 정수 값이 아닙니다.`);
+            }
+            args.push(result);
+            break;
+          }
+          case COMMAND_ARGUMENT_TYPE.NUMBER: {
+            const result = converters.str2num(stringArg);
+            if (result === null) {
+              throw new Error(vem || `${stringArg} 는 숫자 값이 아닙니다.`);
+            }
+            args.push(result);
+            break;
+          }
+          case COMMAND_ARGUMENT_TYPE.BOOLEAN: {
+            const result = converters.str2bool(stringArg);
+            if (result === null) {
+              throw new Error(vem || `${stringArg} 는 논리 값이 아닙니다.`);
+            }
+            args.push(result);
+            break;
+          }
+          case COMMAND_ARGUMENT_TYPE.DATE: {
+            const result = converters.str2date(stringArg);
+            if (result === null) {
+              throw new Error(
+                vem || `${stringArg} 는 날짜(월/일) 값이 아닙니다.`,
+              );
+            }
+            args.push(result);
+            break;
+          }
+          case COMMAND_ARGUMENT_TYPE.TIME: {
+            const result = converters.str2time(stringArg);
+            if (result === null) {
+              throw new Error(
+                vem || `${stringArg} 는 시간(시:분) 값이 아닙니다.`,
+              );
+            }
+            args.push(result);
+            break;
+          }
+        }
+      },
     );
+
+    return args;
   }
 }
