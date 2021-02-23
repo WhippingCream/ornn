@@ -5,7 +5,7 @@ import {
   TalkChannel,
   TalkChatData,
 } from 'node-kakao';
-import { KakaoCommand } from './base.command';
+import { COMMAND_ARGUMENT_TYPE, KakaoCommand } from './base.command';
 
 export class DiceCommand extends KakaoCommand {
   constructor() {
@@ -13,22 +13,31 @@ export class DiceCommand extends KakaoCommand {
       command: 'dice',
       aliases: ['주사위'],
       helpMessage: [
-        '!주사위',
+        '/주사위',
         ' - 1부터 6 중 하나의 숫자가 나옵니다.',
-        '!주사위 N',
+        '/주사위 N',
         ' - N: 1보다 큰 양의 정수',
         ' - 1부터 N 중 하나의 숫자가 나옵니다.',
       ].join('\n'),
+      argOptions: [
+        {
+          type: COMMAND_ARGUMENT_TYPE.INTEGER,
+          optional: true,
+          validationErrorMessage: [
+            '/주사위 N',
+            ' - N: 1보다 큰 양의 정수여야 합니다.',
+          ].join('\n'),
+        },
+      ],
     });
   }
 
-  execute = (data: TalkChatData, channel: TalkChannel, argString: string) => {
+  execute = (data: TalkChatData, channel: TalkChannel, args: [number]) => {
     let max = 6;
 
-    if (argString) {
-      const arg = Math.floor(parseInt(argString, 10));
-      if (arg > 1) {
-        max = arg;
+    if (args[0]) {
+      if (args[0] > 1) {
+        max = args[0];
       }
     }
 
