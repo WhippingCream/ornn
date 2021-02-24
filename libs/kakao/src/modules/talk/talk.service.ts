@@ -124,9 +124,9 @@ export class KakaoTalkService {
   ): (string | number | boolean | CommonTime | CommonDate)[] {
     const args: (string | number | boolean | CommonTime | CommonDate)[] = [];
 
-    command.argOptions.forEach(
+    command.argOptions?.forEach(
       ({ type, optional, validationErrorMessage: vem }, index) => {
-        if (!stringArgs[index] && optional) {
+        if (!(stringArgs && stringArgs[index]) && optional) {
           args.push(null);
           return;
         } else if (!stringArgs[index] && !optional) {
