@@ -1,4 +1,4 @@
-import { ModelBaseController } from '@db/base/base.controller';
+import { ModelBaseController } from '@lib/db/base/base.controller';
 import {
   BadRequestException,
   Body,

@@ -1,11 +1,12 @@
 import { DiceCommand } from './dice.command';
 import { CoinFlipCommand } from './flip-coin.command';
-import { GetReadersCommand } from './get-readers.command';
 import { ParamTestCommand } from './param-test.command';
+import { RegisterChannelCommand } from './register-room.command';
 
 export const kakaoCommands = [
   CoinFlipCommand,
-  GetReadersCommand,
+  // GetReadersCommand,
   DiceCommand,
   ParamTestCommand,
+  RegisterChannelCommand,
 ];

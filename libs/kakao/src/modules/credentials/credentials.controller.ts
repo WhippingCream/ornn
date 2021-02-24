@@ -1,8 +1,8 @@
-import { ModelBaseController } from '@db/base/base.controller';
-import { KakaoCredentialEntity } from '@db/entities/kakao/credential.entity';
+import { ModelBaseController } from '@lib/db/base/base.controller';
+import { KakaoCredentialEntity } from '@lib/db/entities/kakao/credential.entity';
 import { Body, Controller, Get, HttpCode, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { generateString, generateUUID } from '@utils/generators';
+import { generateString, generateUUID } from '@lib/utils/generators';
 import { UpdateResult } from 'typeorm';
 import { UpdateKakaoCredentialDto } from './dto/update.kakao-credential.dto';
 import { KakaoCredentialService } from './credentials.service';

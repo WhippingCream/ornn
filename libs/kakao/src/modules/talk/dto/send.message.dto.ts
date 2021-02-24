@@ -1,4 +1,4 @@
-import { StringParameter } from '@utils';
+import { StringParameter } from '@lib/utils';
 import { IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 

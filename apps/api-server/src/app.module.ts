@@ -1,4 +1,4 @@
-import { DatabaseModule } from '@db';
+import { DatabaseModule } from '@lib/db';
 import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { AppController } from './app.controller';
