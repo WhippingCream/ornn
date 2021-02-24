@@ -1,12 +1,12 @@
-import { kakaoCommands } from '@kakao/commands';
+import { kakaoCommands } from '@lib/kakao/commands';
 import {
   COMMAND_ARGUMENT_TYPE,
   KakaoCommand,
   KakaoOpenCommand,
-} from '@kakao/commands/base.command';
+} from '@lib/kakao/commands/base.command';
 import { Injectable, Logger } from '@nestjs/common';
-import { converters } from '@utils/converters';
-import { CommonDate, CommonTime } from '@utils/interfaces';
+import { converters } from '@lib/utils/converters';
+import { CommonDate, CommonTime } from '@lib/utils/interfaces';
 import {
   OpenChannelUserInfo,
   TalkChannel,
@@ -124,9 +124,9 @@ export class KakaoTalkService {
   ): (string | number | boolean | CommonTime | CommonDate)[] {
     const args: (string | number | boolean | CommonTime | CommonDate)[] = [];
 
-    command.argOptions.forEach(
+    command.argOptions?.forEach(
       ({ type, optional, validationErrorMessage: vem }, index) => {
-        if (!stringArgs[index] && optional) {
+        if (!(stringArgs && stringArgs[index]) && optional) {
           args.push(null);
           return;
         } else if (!stringArgs[index] && !optional) {

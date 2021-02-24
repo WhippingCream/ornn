@@ -1,6 +1,13 @@
-import { ModelBaseEntity } from '@db/base/base.entity';
-import { LENGTH } from '@db/constants/length';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { ModelBaseEntity } from '@lib/db/base/base.entity';
+import { LENGTH } from '@lib/db/constants/length';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  Unique,
+} from 'typeorm';
 import { UserEntity } from '../user.entity';
 
 import { KakaoChannelEntity } from './channel.entity';
@@ -8,13 +15,23 @@ import { KakaoChannelEntity } from './channel.entity';
 @Entity({
   name: 'kakao_users',
 })
+@Unique('idx_channel_user', ['channelId', 'kakaoId'])
 export class KakaoUserEntity extends ModelBaseEntity {
   // bigint는 string 써야함
   @Column({
     type: 'bigint',
-    unique: true,
   })
-  kakaoId: number;
+  kakaoId: string;
+
+  @Column({
+    type: 'integer',
+  })
+  perm: number;
+
+  @Column({
+    type: 'integer',
+  })
+  type: number;
 
   @Column({
     type: 'varchar',
@@ -27,6 +44,11 @@ export class KakaoUserEntity extends ModelBaseEntity {
     length: LENGTH.URL,
   })
   profileImageUrl: string;
+
+  @Column({
+    type: 'integer',
+  })
+  channelId: number;
 
   @ManyToOne(() => KakaoChannelEntity, (channel) => channel.users)
   channel: KakaoChannelEntity;

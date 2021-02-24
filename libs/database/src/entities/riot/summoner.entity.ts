@@ -1,5 +1,5 @@
-import { ModelBaseEntity } from '@db/base/base.entity';
-import { LENGTH } from '@db/constants/length';
+import { ModelBaseEntity } from '@lib/db/base/base.entity';
+import { LENGTH } from '@lib/db/constants/length';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { UserEntity } from '../user.entity';
 import { RiotMatchParticipantEntity } from './match.participant.entity';

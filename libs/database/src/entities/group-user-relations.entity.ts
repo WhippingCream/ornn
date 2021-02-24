@@ -1,4 +1,4 @@
-import { ModelBaseEntity } from '@db/base/base.entity';
+import { ModelBaseEntity } from '@lib/db/base/base.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { GroupEntity } from './group.entity';
 import { UserEntity } from './user.entity';

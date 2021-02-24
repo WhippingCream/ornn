@@ -1,5 +1,5 @@
-import { ModelBaseEntity } from '@db/base/base.entity';
-import { LENGTH } from '@db/constants/length';
+import { ModelBaseEntity } from '@lib/db/base/base.entity';
+import { LENGTH } from '@lib/db/constants/length';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { DiscordGuildEntity } from './discord/guild.entity';
 import { GroupUserRelationsEntity } from './group-user-relations.entity';

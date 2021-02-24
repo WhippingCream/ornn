@@ -1,14 +1,14 @@
-import { IntegerParameter, StringParameter } from '@utils';
+import { StringParameter } from '@lib/utils';
 import { ChannelType } from 'node-kakao';
 
 import { IKakaoChannel } from '../channels.interface';
 
 export class UpdateKakaoChannelDto implements Partial<IKakaoChannel> {
-  @IntegerParameter({
+  @StringParameter({
     required: false,
     description: '카카오톡 채팅방 아이디',
   })
-  kakaoId?: number;
+  kakaoId?: string;
 
   @StringParameter({
     required: false,

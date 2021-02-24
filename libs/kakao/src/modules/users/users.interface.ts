@@ -1,5 +1,7 @@
 export interface IKakaoUser {
-  kakaoId: number;
+  kakaoId: string;
+  perm: number;
+  type: number;
   nickName: string;
   profileImageUrl: string;
 }

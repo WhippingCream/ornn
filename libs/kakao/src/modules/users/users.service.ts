@@ -1,10 +1,10 @@
 import { Connection } from 'typeorm';
 
 import { InjectConnection } from '@nestjs/typeorm';
-import { KakaoUserEntity } from '@db/entities/kakao/user.entity';
-import { ModelBaseService } from '@db/base/base.service';
+import { KakaoUserEntity } from '@lib/db/entities/kakao/user.entity';
+import { ModelBaseService } from '@lib/db/base/base.service';
 import { Injectable } from '@nestjs/common';
-import { CONNECTION } from '@db/constants/connection';
+import { CONNECTION } from '@lib/db/constants/connection';
 
 @Injectable()
 export class KakaoUserService extends ModelBaseService<KakaoUserEntity> {

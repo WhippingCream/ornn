@@ -1,5 +1,5 @@
-import { ModelBaseController } from '@db/base/base.controller';
-import { KakaoUserEntity } from '@db/entities/kakao/user.entity';
+import { ModelBaseController } from '@lib/db/base/base.controller';
+import { KakaoUserEntity } from '@lib/db/entities/kakao/user.entity';
 import {
   Body,
   Controller,

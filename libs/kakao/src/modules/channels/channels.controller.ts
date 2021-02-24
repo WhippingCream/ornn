@@ -1,5 +1,5 @@
-import { ModelBaseController } from '@db/base/base.controller';
-import { KakaoChannelEntity } from '@db/entities/kakao/channel.entity';
+import { ModelBaseController } from '@lib/db/base/base.controller';
+import { KakaoChannelEntity } from '@lib/db/entities/kakao/channel.entity';
 import {
   Body,
   Controller,

@@ -1,4 +1,4 @@
-import { StringParameter } from '@utils';
+import { StringParameter } from '@lib/utils';
 import { IKakaoCredential } from '../credentials.interface';
 
 export class UpdateKakaoCredentialDto
