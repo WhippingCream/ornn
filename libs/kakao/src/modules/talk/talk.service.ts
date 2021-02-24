@@ -1,12 +1,12 @@
-import { kakaoCommands } from '@kakao/commands';
+import { kakaoCommands } from '@lib/kakao/commands';
 import {
   COMMAND_ARGUMENT_TYPE,
   KakaoCommand,
   KakaoOpenCommand,
-} from '@kakao/commands/base.command';
+} from '@lib/kakao/commands/base.command';
 import { Injectable, Logger } from '@nestjs/common';
-import { converters } from '@utils/converters';
-import { CommonDate, CommonTime } from '@utils/interfaces';
+import { converters } from '@lib/utils/converters';
+import { CommonDate, CommonTime } from '@lib/utils/interfaces';
 import {
   OpenChannelUserInfo,
   TalkChannel,

@@ -1,4 +1,4 @@
-import { IntegerParameter, StringParameter } from '@utils';
+import { IntegerParameter, StringParameter } from '@lib/utils';
 import { IKakaoUser } from '../users.interface';
 
 export class CreateKakaoUserDto implements IKakaoUser {

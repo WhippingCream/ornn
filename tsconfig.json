@@ -12,29 +12,35 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@db": [
+      "@lib/db": [
         "libs/database/src"
       ],
-      "@db/*": [
+      "@lib/db/*": [
         "libs/database/src/*"
       ],
-      "@kakao": [
+      "@lib/kakao": [
         "libs/kakao/src"
       ],
-      "@kakao/*": [
+      "@lib/kakao/*": [
         "libs/kakao/src/*"
       ],
-      "@discord": [
+      "@lib/discord": [
         "libs/discord/src"
       ],
-      "@discord/*": [
+      "@lib/discord/*": [
         "libs/discord/src/*"
       ],
-      "@utils": [
+      "@lib/utils": [
         "libs/utils/src"
       ],
-      "@utils/*": [
+      "@lib/utils/*": [
         "libs/utils/src/*"
+      ],
+      "@lib/redis": [
+        "libs/redis/src"
+      ],
+      "@lib/redis/*": [
+        "libs/redis/src/*"
       ]
     }
   }

@@ -39,6 +39,7 @@
     "mysql": "^2.18.1",
     "node-kakao": "^4.0.0",
     "readline-sync": "^1.4.10",
+    "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
@@ -89,14 +90,16 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "@db/(.*)": "<rootDir>/libs/database/src/$1",
-      "@db": "<rootDir>/libs/database/src",
-      "@kakao/(.*)": "<rootDir>/libs/kakao/src/$1",
-      "@kakao": "<rootDir>/libs/kakao/src",
-      "@discord/(.*)": "<rootDir>/libs/discord/src/$1",
-      "@discord": "<rootDir>/libs/discord/src",
-      "@utils/(.*)": "<rootDir>/libs/utils/src/$1",
-      "@utils": "<rootDir>/libs/utils/src"
+      "@lib/db/(.*)": "<rootDir>/libs/database/src/$1",
+      "@lib/db": "<rootDir>/libs/database/src",
+      "@lib/kakao/(.*)": "<rootDir>/libs/kakao/src/$1",
+      "@lib/kakao": "<rootDir>/libs/kakao/src",
+      "@lib/discord/(.*)": "<rootDir>/libs/discord/src/$1",
+      "@lib/discord": "<rootDir>/libs/discord/src",
+      "@lib/utils/(.*)": "<rootDir>/libs/utils/src/$1",
+      "@lib/utils": "<rootDir>/libs/utils/src",
+      "@lib/redis/(.*)": "<rootDir>/libs/redis/src/$1",
+      "@lib/redis": "<rootDir>/libs/redis/src"
     }
   }
 }

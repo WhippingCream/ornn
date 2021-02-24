@@ -1,4 +1,4 @@
-import { CommonDate, CommonTime } from '@utils/interfaces';
+import { CommonDate, CommonTime } from '@lib/utils/interfaces';
 import {
   ChatBuilder,
   KnownChatType,

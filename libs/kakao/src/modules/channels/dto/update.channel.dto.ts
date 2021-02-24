@@ -1,4 +1,4 @@
-import { IntegerParameter, StringParameter } from '@utils';
+import { IntegerParameter, StringParameter } from '@lib/utils';
 import { ChannelType } from 'node-kakao';
 
 import { IKakaoChannel } from '../channels.interface';
