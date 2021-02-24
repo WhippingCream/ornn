@@ -1,5 +1,7 @@
 # Ornn
 
+![docker](https://github.com/WhippingCream/ornn/actions/workflows/docker-publish.yml/badge.svg)
+
 LOL Community Management Bot Service for Whipping Cream
 
 ## Description
