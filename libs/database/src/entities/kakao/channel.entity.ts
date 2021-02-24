@@ -11,7 +11,7 @@ import { KakaoUserEntity } from './user.entity';
 export class KakaoChannelEntity extends ModelBaseEntity {
   // bigint는 string 써야함
   @Column({ type: 'bigint', unique: true })
-  kakaoId: number;
+  kakaoId: string;
 
   @Column({
     type: 'varchar',
@@ -29,7 +29,7 @@ export class KakaoChannelEntity extends ModelBaseEntity {
     type: 'varchar',
     length: LENGTH.URL,
   })
-  roomImageUrl: string;
+  coverUrl: string;
 
   @OneToMany(() => KakaoUserEntity, (user) => user.channel)
   users?: KakaoUserEntity[];
