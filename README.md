@@ -1,6 +1,6 @@
 # Ornn
 
-![docker](https://github.com/WhippingCream/ornn/actions/workflows/docker-publish.yml/badge.svg)
+[![docker](https://github.com/WhippingCream/ornn/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/WhippingCream/ornn/actions/workflows/docker-publish.yml)
 
 LOL Community Management Bot Service for Whipping Cream
 
