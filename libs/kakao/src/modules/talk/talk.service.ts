@@ -105,7 +105,7 @@ export class KakaoTalkService {
 
       if (openChannel && !command.roles.includes(openUserInfo.perm)) {
         Logger.debug('not have perm');
-        return {};
+        throw new Error('권한이 없습니다.');
       }
     }
 
