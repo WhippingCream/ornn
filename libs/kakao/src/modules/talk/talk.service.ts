@@ -126,11 +126,14 @@ export class KakaoTalkService {
 
     command.argOptions?.forEach(
       ({ type, optional, validationErrorMessage: vem }, index) => {
-        if (!(stringArgs && stringArgs[index]) && optional) {
-          args.push(null);
-          return;
-        } else if (!stringArgs[index] && !optional) {
-          throw new Error(`${index + 1}번째 인자는 필수입니다.`);
+        const isExistArgs = stringArgs && stringArgs[index];
+        if (!isExistArgs) {
+          if (optional) {
+            args.push(null);
+            return;
+          } else {
+            throw new Error(`${index + 1}번째 인자는 필수입니다.`);
+          }
         }
 
         // withoutQuotes
