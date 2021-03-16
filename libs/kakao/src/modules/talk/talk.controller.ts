@@ -61,36 +61,37 @@ export class KakaoTalkController extends ModelBaseController {
         if (!sender) return;
 
         if (data.text.charAt(0) === '/') {
-          const { isHelp, command, args } = this.talkService.parseCommand(
-            data,
-            channel,
-          );
-          if (!command) {
-            return;
-          }
-          if (isHelp) {
-            channel.sendChat(
-              new ChatBuilder()
-                .append(new ReplyContent(data.chat))
-                .text(command ? command.helpMessage : '없는 명령어 입니다.')
-                .build(KnownChatType.REPLY),
+          try {
+            const { isHelp, command, args } = this.talkService.parseCommand(
+              data,
+              channel,
             );
-          } else {
-            let verifiedArgs;
-            try {
-              verifiedArgs = this.talkService.validateCommandArguments(
+
+            if (!command) {
+              return;
+            }
+
+            if (isHelp) {
+              channel.sendChat(
+                new ChatBuilder()
+                  .append(new ReplyContent(data.chat))
+                  .text(command ? command.helpMessage : '없는 명령어 입니다.')
+                  .build(KnownChatType.REPLY),
+              );
+            } else {
+              const verifiedArgs = this.talkService.validateCommandArguments(
                 command,
                 args,
               );
               command.execute(data, channel, verifiedArgs);
-            } catch (err) {
-              channel.sendChat(
-                new ChatBuilder()
-                  .append(new ReplyContent(data.chat))
-                  .text(`⚠️ ${err.message}`)
-                  .build(KnownChatType.REPLY),
-              );
             }
+          } catch (err) {
+            channel.sendChat(
+              new ChatBuilder()
+                .append(new ReplyContent(data.chat))
+                .text(`⚠️ ${err.message}`)
+                .build(KnownChatType.REPLY),
+            );
           }
         }
 

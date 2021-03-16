@@ -105,7 +105,7 @@ export class KakaoTalkService {
 
       if (openChannel && !command.roles.includes(openUserInfo.perm)) {
         Logger.debug('not have perm');
-        return {};
+        throw new Error('권한이 없습니다.');
       }
     }
 
@@ -126,11 +126,21 @@ export class KakaoTalkService {
 
     command.argOptions?.forEach(
       ({ type, optional, validationErrorMessage: vem }, index) => {
-        if (!(stringArgs && stringArgs[index]) && optional) {
+        // const isExistArgs = stringArgs && stringArgs[index];
+        // if (!isExistArgs) {
+        //   if (optional) {
+        //     args.push(null);
+        //     return;
+        //   } else {
+        //     throw new Error(`${index + 1}번째 인자는 필수입니다.`);
+        //   }
+        // }
+        if (!(stringArgs && stringArgs[index])) {
+          if (!optional) {
+            throw new Error(vem || `${index + 1}번째 인자는 필수입니다.`);
+          }
           args.push(null);
           return;
-        } else if (!stringArgs[index] && !optional) {
-          throw new Error(`${index + 1}번째 인자는 필수입니다.`);
         }
 
         // withoutQuotes
