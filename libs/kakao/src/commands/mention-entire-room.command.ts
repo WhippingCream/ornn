@@ -18,9 +18,11 @@ export class MentionEntireRoomCommand extends KakaoOpenCommand {
         {
           type: COMMAND_ARGUMENT_TYPE.STRING,
           optional: false,
+          validationErrorMessage: '[❗️] 메시지를 입력해 주세요.',
         },
       ],
       roles: [OpenChannelUserPerm.OWNER, OpenChannelUserPerm.MANAGER],
+      helpMessage: '/주사위 M\n - M: 전달할 메시지',
     });
   }
 
