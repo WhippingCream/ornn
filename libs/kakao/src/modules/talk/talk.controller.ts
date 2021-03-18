@@ -9,8 +9,10 @@ import {
   Logger,
   Put,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { ApiTags } from '@nestjs/swagger';
 import { encode } from 'js-base64';
+import { DateTime } from 'luxon';
 import {
   AsyncCommandResult,
   AuthApiClient,
@@ -466,5 +468,13 @@ export class KakaoTalkController extends ModelBaseController {
     });
 
     channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
+  }
+
+  @Cron('0 */5 * * * *') // every 5 minutes
+  logonStatusMonitor() {
+    const { logon } = this.talkService.client;
+    Logger.log(
+      `${DateTime.now().toFormat('yyyy.MM.dd HH:mm:ss')} LogOn(${logon})`,
+    );
   }
 }
