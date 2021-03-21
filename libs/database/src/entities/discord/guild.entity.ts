@@ -10,7 +10,9 @@ export class DiscordGuildEntity extends ModelBaseEntity {
   @Column({ type: 'bigint', unique: true })
   discordId: string;
 
-  @OneToOne(() => GroupEntity, (group) => group.discordGuild)
+  @OneToOne(() => GroupEntity, (group) => group.discordGuild, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'groupId' })
   group: GroupEntity;
 }

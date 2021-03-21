@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import * as dayjs from 'dayjs';
 import { CommonDate, CommonTime } from './interfaces';
 
 const str2boolConverter = (src: string): boolean | null => {
@@ -32,14 +32,18 @@ const str2numConverter = (src: string): number | null => {
 const str2timeConverter = (src: string): CommonTime | null => {
   // HH:mm
   if (/^([01]\d|2[0-3]):?([0-5]\d)$/.test(src)) {
-    const { hour, minute } = DateTime.fromFormat(src, 'HH:mm');
-    return { hour, minute };
+    const datetime = dayjs(src, 'HH:mm');
+    return { hour: datetime.hour(), minute: datetime.minute() };
   }
 
   // HH:mm:dd
   if (/^([01]\d|2[0-3]):?([0-5]\d):?([0-5]\d)$/.test(src)) {
-    const { hour, minute, second } = DateTime.fromFormat(src, 'HH:mm:ss');
-    return { hour, minute, second };
+    const datetime = dayjs(src, 'HH:mm:ss');
+    return {
+      hour: datetime.hour(),
+      minute: datetime.minute(),
+      second: datetime.second(),
+    };
   }
 
   return null;
@@ -51,8 +55,8 @@ const str2dateConverter = (src: string): CommonDate | null => {
 
   // MM-dd
   if (/^(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$/.test(_src)) {
-    const { month, day } = DateTime.fromFormat(_src, 'MM-dd');
-    return { month, day };
+    const datetime = dayjs(_src, 'MM-dd');
+    return { month: datetime.month() + 1, day: datetime.date() };
   }
 
   return null;

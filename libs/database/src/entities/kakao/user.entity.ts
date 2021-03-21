@@ -1,13 +1,7 @@
 import { ModelBaseEntity } from '@lib/db/base/base.entity';
 import { LENGTH } from '@lib/db/constants/length';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  Unique,
-} from 'typeorm';
+import { USER_LEVEL, USER_STATUS } from '@lib/db/enum';
+import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { UserEntity } from '../user.entity';
 
 import { KakaoChannelEntity } from './channel.entity';
@@ -50,10 +44,41 @@ export class KakaoUserEntity extends ModelBaseEntity {
   })
   channelId: number;
 
-  @ManyToOne(() => KakaoChannelEntity, (channel) => channel.users)
+  @Column({
+    type: 'integer',
+  })
+  activityScore: number;
+
+  @Column({
+    type: 'varchar',
+  })
+  level: USER_LEVEL;
+
+  @Column({
+    type: 'varchar',
+  })
+  status: USER_STATUS;
+
+  @Column({
+    type: 'timestamp',
+  })
+  lastEnteredAt: Date;
+
+  @Column({
+    type: 'timestamp',
+  })
+  lastExitedAt: Date;
+
+  @ManyToOne(() => KakaoChannelEntity, (channel) => channel.users, {
+    createForeignKeyConstraints: false,
+  })
   channel: KakaoChannelEntity;
 
-  @OneToOne(() => UserEntity, (user) => user.kakaoUser)
+  @ManyToOne(() => UserEntity, (user) => user.kakaoUsers, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
+
+  userId: number;
 }
