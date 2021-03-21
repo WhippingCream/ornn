@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { ApiTags } from '@nestjs/swagger';
+import * as dayjs from 'dayjs';
 import { encode } from 'js-base64';
-import { DateTime } from 'luxon';
 import {
   AsyncCommandResult,
   AuthApiClient,
@@ -473,8 +473,6 @@ export class KakaoTalkController extends ModelBaseController {
   @Cron('0 */5 * * * *') // every 5 minutes
   logonStatusMonitor() {
     const { logon } = this.talkService.client;
-    Logger.log(
-      `${DateTime.now().toFormat('yyyy.MM.dd HH:mm:ss')} LogOn(${logon})`,
-    );
+    Logger.log(`${dayjs().format('YYYY.MM.DD HH:mm:ss')} LogOn(${logon})`);
   }
 }

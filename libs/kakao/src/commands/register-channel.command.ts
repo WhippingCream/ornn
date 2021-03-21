@@ -1,6 +1,8 @@
 import { CONNECTION } from '@lib/db/constants/connection';
 import { KakaoChannelEntity } from '@lib/db/entities/kakao/channel.entity';
 import { KakaoUserEntity } from '@lib/db/entities/kakao/user.entity';
+import { USER_LEVEL, USER_STATUS } from '@lib/db/enum';
+import * as dayjs from 'dayjs';
 import {
   ChatBuilder,
   KnownChatType,
@@ -12,6 +14,19 @@ import {
 import { getManager } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { KakaoOpenCommand } from './base.command';
+
+const getLevel = (origin: OpenChannelUserPerm) => {
+  switch (origin) {
+    case OpenChannelUserPerm.OWNER:
+      return USER_LEVEL.ADMIN;
+    case OpenChannelUserPerm.MANAGER:
+      return USER_LEVEL.MANAGER;
+    case OpenChannelUserPerm.NONE:
+      return USER_LEVEL.MEMBER;
+    default:
+      return USER_LEVEL.ALIEN;
+  }
+};
 
 export class RegisterChannelCommand extends KakaoOpenCommand {
   constructor() {
@@ -54,6 +69,8 @@ export class RegisterChannelCommand extends KakaoOpenCommand {
 
         const users: QueryDeepPartialEntity<KakaoUserEntity>[] = [];
 
+        const currentDate = dayjs().toDate();
+
         for (const user of channel.getAllUserInfo()) {
           users.push({
             kakaoId: user.userId.toString(),
@@ -62,6 +79,11 @@ export class RegisterChannelCommand extends KakaoOpenCommand {
             name: user.nickname,
             profileImageUrl: user.fullProfileURL,
             channelId: result.identifiers[0].id,
+            status: USER_STATUS.ACTIVATED,
+            level: getLevel(user.perm),
+            activityScore: 0,
+            lastEnteredAt: currentDate,
+            lastExitedAt: currentDate,
           });
         }
 

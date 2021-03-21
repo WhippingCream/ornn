@@ -31,10 +31,22 @@ export class KakaoChannelEntity extends ModelBaseEntity {
   })
   coverUrl: string;
 
-  @OneToMany(() => KakaoUserEntity, (user) => user.channel)
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  lastSynchronizedAt?: Date;
+
+  @OneToMany(() => KakaoUserEntity, (user) => user.channel, {
+    createForeignKeyConstraints: false,
+  })
   users?: KakaoUserEntity[];
 
-  @OneToOne(() => GroupEntity, (group) => group.kakaoChannel)
+  @OneToOne(() => GroupEntity, (group) => group.kakaoChannel, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'groupId' })
   group: GroupEntity;
+
+  groupId: number;
 }
