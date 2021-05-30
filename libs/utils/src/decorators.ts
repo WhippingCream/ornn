@@ -2,7 +2,9 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsByteLength,
+  IsDateString,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -11,18 +13,18 @@ import {
   ValidationOptions,
 } from 'class-validator';
 
-interface IBasicParameterOptions {
+interface BasicParameterOptions {
   required: boolean;
   description?: string;
   validationOptions?: ValidationOptions;
 }
 
-interface IStringParameterOptions extends IBasicParameterOptions {
+interface StringParameterOptions extends BasicParameterOptions {
   minLength?: number;
   maxLength?: number;
 }
 
-interface IIntegerParameterOptions extends IBasicParameterOptions {
+interface IntegerParameterOptions extends BasicParameterOptions {
   min?: number;
   max?: number;
 }
@@ -33,7 +35,7 @@ export function StringParameter({
   validationOptions,
   minLength,
   maxLength,
-}: IStringParameterOptions) {
+}: StringParameterOptions) {
   const decorators: (ClassDecorator | MethodDecorator | PropertyDecorator)[] = [
     ApiProperty({
       type: 'string',
@@ -57,14 +59,14 @@ export function IntegerParameter({
   validationOptions,
   min,
   max,
-}: IIntegerParameterOptions) {
+}: IntegerParameterOptions) {
   const decorators: (ClassDecorator | MethodDecorator | PropertyDecorator)[] = [
     ApiProperty({
       type: 'integer',
       required,
       description,
     }),
-    IsString(validationOptions),
+    IsInt(validationOptions),
     required ? IsNotEmpty() : IsOptional(),
   ];
 
@@ -81,7 +83,7 @@ export function IntegerParameter({
 
 export function EnumParameter(
   entity: Record<string, unknown>,
-  { required, description, validationOptions }: IBasicParameterOptions,
+  { required, description, validationOptions }: BasicParameterOptions,
 ) {
   const decorators: (ClassDecorator | MethodDecorator | PropertyDecorator)[] = [
     ApiProperty({
@@ -90,6 +92,25 @@ export function EnumParameter(
       description,
     }),
     IsEnum(entity, validationOptions),
+    required ? IsNotEmpty() : IsOptional(),
+  ];
+
+  return applyDecorators(...decorators);
+}
+
+export function DateParameter({
+  required,
+  description,
+  validationOptions,
+}: BasicParameterOptions) {
+  const decorators: (ClassDecorator | MethodDecorator | PropertyDecorator)[] = [
+    ApiProperty({
+      type: 'string',
+      format: 'date-time',
+      required,
+      description,
+    }),
+    IsDateString({ strict: false }, validationOptions),
     required ? IsNotEmpty() : IsOptional(),
   ];
 

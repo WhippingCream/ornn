@@ -1,21 +1,19 @@
 import { ModelBaseEntity } from '@lib/db/base/base.entity';
-import { LENGTH } from '@lib/db/constants/length';
-import { USER_LEVEL, USER_STATUS } from '@lib/db/enum';
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
-import { UserEntity } from '../user.entity';
+import { OrnnUsersEntity } from '../ornn/user.entity';
 
-import { KakaoChannelEntity } from './channel.entity';
+import { KakaoChannelsEntity } from './channel.entity';
 
 @Entity({
-  name: 'kakao_users',
+  name: 'KakaoUsers',
 })
 @Unique('idx_channel_user', ['channelId', 'kakaoId'])
-export class KakaoUserEntity extends ModelBaseEntity {
-  // bigint는 string 써야함
+export class KakaoUsersEntity extends ModelBaseEntity {
   @Column({
     type: 'bigint',
   })
-  kakaoId: string;
+  kakaoId: bigint;
 
   @Column({
     type: 'integer',
@@ -29,13 +27,11 @@ export class KakaoUserEntity extends ModelBaseEntity {
 
   @Column({
     type: 'varchar',
-    length: LENGTH.SHORT_STRING,
   })
   name: string;
 
   @Column({
     type: 'varchar',
-    length: LENGTH.URL,
   })
   profileImageUrl: string;
 
@@ -50,14 +46,16 @@ export class KakaoUserEntity extends ModelBaseEntity {
   activityScore: number;
 
   @Column({
-    type: 'varchar',
+    type: 'enum',
+    enum: KakaoUserLevel,
   })
-  level: USER_LEVEL;
+  level: KakaoUserLevel;
 
   @Column({
-    type: 'varchar',
+    type: 'enum',
+    enum: KakaoUserStatus,
   })
-  status: USER_STATUS;
+  status: KakaoUserStatus;
 
   @Column({
     type: 'timestamp',
@@ -69,16 +67,20 @@ export class KakaoUserEntity extends ModelBaseEntity {
   })
   lastExitedAt: Date;
 
-  @ManyToOne(() => KakaoChannelEntity, (channel) => channel.users, {
+  @ManyToOne(() => KakaoChannelsEntity, (channel) => channel.users, {
     createForeignKeyConstraints: false,
   })
-  channel: KakaoChannelEntity;
+  channel: KakaoChannelsEntity;
 
-  @ManyToOne(() => UserEntity, (user) => user.kakaoUsers, {
+  @ManyToOne(() => OrnnUsersEntity, (ornnUser) => ornnUser.kakaoUsers, {
     createForeignKeyConstraints: false,
   })
-  @JoinColumn({ name: 'userId' })
-  user: UserEntity;
+  @JoinColumn({ name: 'ornnUserId' })
+  ornnUser: OrnnUsersEntity;
 
-  userId: number;
+  @Column({
+    name: 'ornnUserId',
+    nullable: true,
+  })
+  ornnUserId?: number;
 }

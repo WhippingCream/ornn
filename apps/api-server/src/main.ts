@@ -9,6 +9,7 @@ async function bootstrap() {
     .setTitle('Ornn')
     .setDescription('The Ornn API description')
     .setVersion('0.0.1')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

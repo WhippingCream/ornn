@@ -2,12 +2,12 @@ import { IntegerParameter, StringParameter } from '@lib/utils';
 import { IKakaoUser } from '../users.interface';
 
 export class CreateKakaoUserDto implements IKakaoUser {
-  @StringParameter({
+  @IntegerParameter({
     required: true,
     description:
       '카카오톡 채팅방 참여인원 내부아이디 (같은 유저여도 채팅방 마다 다름)',
   })
-  kakaoId: string;
+  kakaoId: bigint;
 
   @IntegerParameter({
     required: true,

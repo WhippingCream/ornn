@@ -1,7 +1,7 @@
 import { CONNECTION } from '@lib/db/constants/connection';
-import { KakaoChannelEntity } from '@lib/db/entities/kakao/channel.entity';
-import { KakaoUserEntity } from '@lib/db/entities/kakao/user.entity';
-import { USER_LEVEL, USER_STATUS } from '@lib/db/enum';
+import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
+import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import * as dayjs from 'dayjs';
 import {
   ChatBuilder,
@@ -18,13 +18,13 @@ import { KakaoOpenCommand } from './base.command';
 const getLevel = (origin: OpenChannelUserPerm) => {
   switch (origin) {
     case OpenChannelUserPerm.OWNER:
-      return USER_LEVEL.ADMIN;
+      return KakaoUserLevel.Admin;
     case OpenChannelUserPerm.MANAGER:
-      return USER_LEVEL.MANAGER;
+      return KakaoUserLevel.Manager;
     case OpenChannelUserPerm.NONE:
-      return USER_LEVEL.MEMBER;
+      return KakaoUserLevel.Member;
     default:
-      return USER_LEVEL.ALIEN;
+      return KakaoUserLevel.Alien;
   }
 };
 
@@ -43,7 +43,7 @@ export class RegisterChannelCommand extends KakaoOpenCommand {
 
       if (
         await manager
-          .getRepository(KakaoChannelEntity)
+          .getRepository(KakaoChannelsEntity)
           .findOne({ where: { kakaoId: channel.channelId.toString() } })
       ) {
         return channel.sendChat(
@@ -58,28 +58,28 @@ export class RegisterChannelCommand extends KakaoOpenCommand {
         const result = await transactionManager
           .createQueryBuilder()
           .insert()
-          .into(KakaoChannelEntity)
+          .into(KakaoChannelsEntity)
           .values({
-            kakaoId: channel.channelId.toString(),
+            kakaoId: channel.channelId.toBigInt(),
             type: channel.info.type,
             name: channel.getDisplayName(),
             coverUrl: channel.info.openLink.linkCoverURL,
           })
           .execute();
 
-        const users: QueryDeepPartialEntity<KakaoUserEntity>[] = [];
+        const users: QueryDeepPartialEntity<KakaoUsersEntity>[] = [];
 
         const currentDate = dayjs().toDate();
 
         for (const user of channel.getAllUserInfo()) {
           users.push({
-            kakaoId: user.userId.toString(),
+            kakaoId: user.userId.toBigInt(),
             perm: user.perm,
             type: user.userType,
             name: user.nickname,
             profileImageUrl: user.fullProfileURL,
             channelId: result.identifiers[0].id,
-            status: USER_STATUS.ACTIVATED,
+            status: KakaoUserStatus.Activated,
             level: getLevel(user.perm),
             activityScore: 0,
             lastEnteredAt: currentDate,
@@ -90,7 +90,7 @@ export class RegisterChannelCommand extends KakaoOpenCommand {
         await transactionManager
           .createQueryBuilder()
           .insert()
-          .into(KakaoUserEntity)
+          .into(KakaoUsersEntity)
           .values(users)
           .execute();
       });

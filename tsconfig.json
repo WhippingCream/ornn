@@ -41,6 +41,18 @@
       ],
       "@lib/redis/*": [
         "libs/redis/src/*"
+      ],
+      "@lib/auth": [
+        "libs/auth/src"
+      ],
+      "@lib/auth/*": [
+        "libs/auth/src/*"
+      ],
+      "@lib/ornn": [
+        "libs/ornn/src"
+      ],
+      "@lib/ornn/*": [
+        "libs/ornn/src/*"
       ]
     }
   }

@@ -1,12 +1,12 @@
 import { ModelBaseEntity } from '@lib/db/base/base.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { GroupEntity } from './group.entity';
-import { UserEntity } from './user.entity';
+import { OrnnGroupsEntity } from './group.entity';
+import { OrnnUsersEntity } from './user.entity';
 
 @Entity({
-  name: 'group_user_relations',
+  name: 'OrnnGroupUserRelations',
 })
-export class GroupUserRelationsEntity extends ModelBaseEntity {
+export class OrnnGroupUserRelationsEntity extends ModelBaseEntity {
   @Column({
     type: 'integer',
   })
@@ -27,18 +27,25 @@ export class GroupUserRelationsEntity extends ModelBaseEntity {
   })
   additionalRating: number;
 
-  @ManyToOne(() => UserEntity, (user) => user.groupRelations, {
+  @ManyToOne(() => OrnnUsersEntity, (user) => user.groupRelations, {
     createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'userId' })
-  user: UserEntity;
+  user: OrnnUsersEntity;
 
-  @ManyToOne(() => GroupEntity, (group) => group.userRelations, {
+  @ManyToOne(() => OrnnGroupsEntity, (group) => group.userRelations, {
     createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'groupId' })
-  group: GroupEntity;
+  group: OrnnGroupsEntity;
 
+  @Column({
+    name: 'userId',
+  })
   userId: number;
+
+  @Column({
+    name: 'groupId',
+  })
   groupId: number;
 }

@@ -11,3 +11,8 @@ export interface CommonDate {
 }
 
 export interface CommonDateTime extends CommonDate, CommonTime {}
+
+export interface OrnnErrorMeta {
+  code: string;
+  message: string;
+}

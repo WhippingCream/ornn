@@ -1,5 +1,5 @@
 import { ModelBaseController } from '@lib/db/base/base.controller';
-import { KakaoCredentialEntity } from '@lib/db/entities/kakao/credential.entity';
+import { KakaoCredentialsEntity } from '@lib/db/entities/kakao/credential.entity';
 import { Body, Controller, Get, HttpCode, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { generateString, generateUUID } from '@lib/utils/generators';
@@ -15,7 +15,7 @@ export class KakaoCredentialController extends ModelBaseController {
   }
 
   @Get()
-  async find(): Promise<KakaoCredentialEntity> {
+  async find(): Promise<KakaoCredentialsEntity> {
     let result = await this.service.getOne(1);
     if (!result) {
       await this.service.createOne({

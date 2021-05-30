@@ -9,6 +9,7 @@ import {
   Logger,
   Put,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { ApiTags } from '@nestjs/swagger';
 import * as dayjs from 'dayjs';
@@ -53,6 +54,7 @@ export class KakaoTalkController extends ModelBaseController {
   constructor(
     protected credentialService: KakaoCredentialService,
     protected talkService: KakaoTalkService,
+    protected configService: ConfigService,
   ) {
     super();
 
@@ -334,15 +336,21 @@ export class KakaoTalkController extends ModelBaseController {
       },
     );
 
-    this._login()
-      .then((result) => {
-        if (result.success) {
-          Logger.log('[Kakao] Success to auto login!');
-        }
-      })
-      .catch((reason) => {
-        Logger.warn(`[Kakao] Fail to auto login(${reason})!`);
-      });
+    if (configService.get('KAKAO_BOT_AUTO_SIGN_IN') !== '0') {
+      this._login()
+        .then((result) => {
+          if (result.success) {
+            Logger.log('[Kakao] Success to auto login!');
+          }
+        })
+        .catch((reason) => {
+          Logger.warn(`[Kakao] Fail to auto login(${reason})!`);
+        });
+    } else {
+      Logger.warn(
+        '[Kakao] Auto login is disabled, check env[KAKAO_BOT_AUTO_SIGN_IN]!',
+      );
+    }
   }
 
   @Get('status')
