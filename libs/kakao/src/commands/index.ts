@@ -1,5 +1,6 @@
 import { DiceCommand } from './dice.command';
 import { CoinFlipCommand } from './flip-coin.command';
+import { MentionByStatusCommand } from './mention-by-status.command';
 import { MentionEntireRoomCommand } from './mention-entire-room.command';
 import { ParamTestCommand } from './param-test.command';
 import { RegisterChannelCommand } from './register-channel.command';
@@ -13,4 +14,5 @@ export const kakaoCommands = [
   RegisterChannelCommand,
   SyncChannelCommand,
   MentionEntireRoomCommand,
+  MentionByStatusCommand,
 ];
