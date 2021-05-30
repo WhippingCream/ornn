@@ -79,6 +79,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/auth/tsconfig.lib.json"
       }
+    },
+    "ornn": {
+      "type": "library",
+      "root": "libs/ornn",
+      "entryFile": "index",
+      "sourceRoot": "libs/ornn/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/ornn/tsconfig.lib.json"
+      }
     }
   }
 }
