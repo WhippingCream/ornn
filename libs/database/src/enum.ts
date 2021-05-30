@@ -1,0 +1,15 @@
+export enum USER_LEVEL {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  VIP = 'VIP',
+  MEMBER = 'MEMBER',
+  NEWBIE = 'NEWBIE',
+  ALIEN = 'ALIEN',
+}
+
+export enum USER_STATUS {
+  ACTIVATED = 'ACTIVATED',
+  INACTIVATED = 'INACTIVATED',
+  BANNED = 'BANNED',
+  EXITED = 'EXITED',
+}

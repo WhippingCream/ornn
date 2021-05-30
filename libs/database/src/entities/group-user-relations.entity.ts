@@ -1,5 +1,5 @@
 import { ModelBaseEntity } from '@lib/db/base/base.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { GroupEntity } from './group.entity';
 import { UserEntity } from './user.entity';
 
@@ -27,9 +27,18 @@ export class GroupUserRelationsEntity extends ModelBaseEntity {
   })
   additionalRating: number;
 
-  @ManyToOne(() => UserEntity, (user) => user.groupRelations)
+  @ManyToOne(() => UserEntity, (user) => user.groupRelations, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => GroupEntity, (group) => group.userRelations)
+  @ManyToOne(() => GroupEntity, (group) => group.userRelations, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'groupId' })
   group: GroupEntity;
+
+  userId: number;
+  groupId: number;
 }
