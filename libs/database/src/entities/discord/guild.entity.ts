@@ -17,6 +17,7 @@ export class DiscordGuildsEntity extends ModelBaseEntity {
 
   @Column({
     name: 'ornnGroupId',
+    nullable: true,
   })
-  ornnGroupId: number;
+  ornnGroupId?: number;
 }

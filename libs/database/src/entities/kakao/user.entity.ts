@@ -80,6 +80,7 @@ export class KakaoUsersEntity extends ModelBaseEntity {
 
   @Column({
     name: 'ornnUserId',
+    nullable: true,
   })
-  ornnUserId: number;
+  ornnUserId?: number;
 }

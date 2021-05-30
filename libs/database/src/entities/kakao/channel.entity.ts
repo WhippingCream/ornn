@@ -45,6 +45,7 @@ export class KakaoChannelsEntity extends ModelBaseEntity {
 
   @Column({
     name: 'ornnGroupId',
+    nullable: true,
   })
-  ornnGroupId: number;
+  ornnGroupId?: number;
 }
