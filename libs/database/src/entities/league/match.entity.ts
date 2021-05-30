@@ -1,17 +1,16 @@
 import { ModelBaseEntity } from '@lib/db/base/base.entity';
-import { LENGTH } from '@lib/db/constants/length';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { RiotMatchParticipantEntity } from './match.participant.entity';
+import { LeagueMatchParticipantsEntity } from './match.participant.entity';
 
 @Entity({
-  name: 'riot_matches',
+  name: 'LeagueMatches',
 })
-export class RiotMatchEntity extends ModelBaseEntity {
+export class LeagueMatchesEntity extends ModelBaseEntity {
   @Column({
     type: 'bigint',
     unique: true,
   })
-  gameId: string;
+  gameId: bigint;
 
   @Column({
     type: 'integer',
@@ -20,7 +19,6 @@ export class RiotMatchEntity extends ModelBaseEntity {
 
   @Column({
     type: 'varchar',
-    length: LENGTH.STRING,
   })
   gameType: string;
 
@@ -28,18 +26,17 @@ export class RiotMatchEntity extends ModelBaseEntity {
     type: 'bigint',
     unique: true,
   })
-  gameDuration: string;
+  gameDuration: bigint;
 
   @Column({
     type: 'varchar',
-    length: LENGTH.STRING,
   })
   platformId: string;
   @Column({
     type: 'bigint',
     unique: true,
   })
-  gameCreation: string;
+  gameCreation: bigint;
 
   @Column({
     type: 'integer',
@@ -48,7 +45,6 @@ export class RiotMatchEntity extends ModelBaseEntity {
 
   @Column({
     type: 'varchar',
-    length: LENGTH.STRING,
   })
   gameVersion: string;
 
@@ -59,13 +55,12 @@ export class RiotMatchEntity extends ModelBaseEntity {
 
   @Column({
     type: 'varchar',
-    length: LENGTH.STRING,
   })
   gameMode: string;
 
   @OneToMany(
-    () => RiotMatchParticipantEntity,
+    () => LeagueMatchParticipantsEntity,
     (participant) => participant.match,
   )
-  participants: RiotMatchParticipantEntity[];
+  participants: LeagueMatchParticipantsEntity[];
 }

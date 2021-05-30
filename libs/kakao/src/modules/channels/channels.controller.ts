@@ -1,5 +1,5 @@
 import { ModelBaseController } from '@lib/db/base/base.controller';
-import { KakaoChannelEntity } from '@lib/db/entities/kakao/channel.entity';
+import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
 import {
   Body,
   Controller,
@@ -24,12 +24,12 @@ export class KakaoChannelController extends ModelBaseController {
   }
 
   @Get()
-  findAll(): Promise<[KakaoChannelEntity[], number]> {
+  findAll(): Promise<[KakaoChannelsEntity[], number]> {
     return this.service.getList();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<KakaoChannelEntity> {
+  findOne(@Param('id') id: number): Promise<KakaoChannelsEntity> {
     return this.service.getOne(id);
   }
 

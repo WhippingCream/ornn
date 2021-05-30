@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsByteLength,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -64,7 +65,7 @@ export function IntegerParameter({
       required,
       description,
     }),
-    IsString(validationOptions),
+    IsInt(validationOptions),
     required ? IsNotEmpty() : IsOptional(),
   ];
 
