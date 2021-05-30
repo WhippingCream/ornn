@@ -1,7 +1,7 @@
 import { CONNECTION } from '@lib/db/constants/connection';
-import { KakaoChannelEntity } from '@lib/db/entities/kakao/channel.entity';
-import { KakaoUserEntity } from '@lib/db/entities/kakao/user.entity';
-import { USER_LEVEL, USER_STATUS } from '@lib/db/enum';
+import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
+import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import {
   ChatBuilder,
   KnownChatType,
@@ -14,13 +14,15 @@ import {
 import { getManager } from 'typeorm';
 import { COMMAND_ARGUMENT_TYPE, KakaoOpenCommand } from './base.command';
 
-const userStatusMap: Map<string, USER_STATUS> = new Map<string, USER_STATUS>([
-  ['휴면', USER_STATUS.INACTIVATED],
-]);
+const userStatusMap: Map<string, KakaoUserStatus> = new Map<
+  string,
+  KakaoUserStatus
+>([['휴면', KakaoUserStatus.Inactivated]]);
 
-const userLevelMap: Map<string, USER_LEVEL> = new Map<string, USER_LEVEL>([
-  ['신입', USER_LEVEL.NEWBIE],
-]);
+const userLevelMap: Map<string, KakaoUserLevel> = new Map<
+  string,
+  KakaoUserLevel
+>([['신입', KakaoUserLevel.Newbie]]);
 
 export class MentionByStatusCommand extends KakaoOpenCommand {
   constructor() {
@@ -60,15 +62,17 @@ export class MentionByStatusCommand extends KakaoOpenCommand {
     const chatBuilder = new ChatBuilder().text(
       `※ [${typeName}유저] 대상으로 호출 되는 메시지입니다.\n\n${args[1]}\n\n`,
     );
-    const targetStatus: USER_STATUS =
-      userStatusMap.get(typeName) ?? USER_STATUS.ACTIVATED;
-    const targetLevel: USER_LEVEL =
-      userLevelMap.get(typeName) ?? USER_LEVEL.MEMBER;
+    const targetStatus: KakaoUserStatus =
+      userStatusMap.get(typeName) ?? KakaoUserStatus.Activated;
+    const targetLevel: KakaoUserLevel =
+      userLevelMap.get(typeName) ?? KakaoUserLevel.Member;
 
     try {
       const manager = getManager(CONNECTION.DEFAULT_NAME);
 
-      const channelRepository = await manager.getRepository(KakaoChannelEntity);
+      const channelRepository = await manager.getRepository(
+        KakaoChannelsEntity,
+      );
       const channelEntity = await channelRepository.findOne({
         where: { kakaoId: channel.channelId.toString() },
       });
@@ -82,7 +86,7 @@ export class MentionByStatusCommand extends KakaoOpenCommand {
         );
       }
 
-      const userRepository = await manager.getRepository(KakaoUserEntity);
+      const userRepository = await manager.getRepository(KakaoUsersEntity);
       const users = await userRepository.find({
         where: { channelId: channelEntity.id },
         relations: ['channel'],
@@ -92,7 +96,7 @@ export class MentionByStatusCommand extends KakaoOpenCommand {
         if (
           users.findIndex(
             (elem) =>
-              elem.kakaoId == user.userId.toString() &&
+              elem.kakaoId == user.userId.toBigInt() &&
               elem.status == targetStatus &&
               elem.level == targetLevel,
           ) != -1

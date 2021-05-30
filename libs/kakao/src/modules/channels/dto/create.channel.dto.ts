@@ -1,13 +1,13 @@
-import { StringParameter } from '@lib/utils';
+import { IntegerParameter, StringParameter } from '@lib/utils';
 import { ChannelType } from 'node-kakao';
 import { IKakaoChannel } from '../channels.interface';
 
 export class CreateKakaoChannelDto implements IKakaoChannel {
-  @StringParameter({
+  @IntegerParameter({
     required: true,
     description: '카카오톡 채팅방 내부아이디',
   })
-  kakaoId: string;
+  kakaoId: bigint;
 
   @StringParameter({
     required: true,

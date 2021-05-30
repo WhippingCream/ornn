@@ -1,18 +1,23 @@
 import { ModelBaseEntity } from '@lib/db/base/base.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
-import { GroupEntity } from '../group.entity';
+import { OrnnGroupsEntity } from '../ornn/group.entity';
 
 @Entity({
-  name: 'discord_guilds',
+  name: 'DiscordGuilds',
 })
-export class DiscordGuildEntity extends ModelBaseEntity {
-  // bigint는 string 써야함
+export class DiscordGuildsEntity extends ModelBaseEntity {
   @Column({ type: 'bigint', unique: true })
-  discordId: string;
+  discordId: bigint;
 
-  @OneToOne(() => GroupEntity, (group) => group.discordGuild, {
+  @OneToOne(() => OrnnGroupsEntity, (group) => group.discordGuild, {
     createForeignKeyConstraints: false,
   })
-  @JoinColumn({ name: 'groupId' })
-  group: GroupEntity;
+  @JoinColumn({ name: 'ornnGroupId' })
+  ornnGroup: OrnnGroupsEntity;
+
+  @Column({
+    name: 'ornnGroupId',
+    nullable: true,
+  })
+  ornnGroupId?: number;
 }

@@ -3,9 +3,10 @@ import { KakaoModule } from '@lib/kakao';
 
 import { V1Controller } from './v1.controller';
 import { V1Service } from './v1.service';
+import { AuthModule } from '@lib/auth';
 
 @Module({
-  imports: [KakaoModule],
+  imports: [KakaoModule, AuthModule],
   controllers: [V1Controller],
   providers: [V1Service],
 })

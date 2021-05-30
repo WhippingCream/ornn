@@ -1,7 +1,7 @@
 import { CONNECTION } from '@lib/db/constants/connection';
-import { KakaoChannelEntity } from '@lib/db/entities/kakao/channel.entity';
-import { KakaoUserEntity } from '@lib/db/entities/kakao/user.entity';
-import { USER_LEVEL, USER_STATUS } from '@lib/db/enum';
+import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
+import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import * as dayjs from 'dayjs';
 import {
   ChatBuilder,
@@ -17,7 +17,7 @@ import { KakaoOpenCommand } from './base.command';
 
 interface User {
   currentUserInfo?: OpenChannelUserInfo;
-  userRow?: KakaoUserEntity;
+  userRow?: KakaoUsersEntity;
 }
 
 export class SyncChannelCommand extends KakaoOpenCommand {
@@ -33,8 +33,8 @@ export class SyncChannelCommand extends KakaoOpenCommand {
     const manager = getManager(CONNECTION.DEFAULT_NAME);
 
     const repositories = {
-      channel: manager.getRepository(KakaoChannelEntity),
-      user: manager.getRepository(KakaoUserEntity),
+      channel: manager.getRepository(KakaoChannelsEntity),
+      user: manager.getRepository(KakaoUsersEntity),
     };
 
     const channelRow = await repositories.channel.findOne({
@@ -56,10 +56,10 @@ export class SyncChannelCommand extends KakaoOpenCommand {
 
     repositories.channel.save(channelRow);
 
-    const currentChannelUserMap = new Map<string, User>();
+    const currentChannelUserMap = new Map<bigint, User>();
 
     for (const channelUserInfo of channel.getAllUserInfo()) {
-      currentChannelUserMap.set(channelUserInfo.userId.toString(), {
+      currentChannelUserMap.set(channelUserInfo.userId.toBigInt(), {
         currentUserInfo: channelUserInfo,
       });
     }
@@ -81,7 +81,7 @@ export class SyncChannelCommand extends KakaoOpenCommand {
     ] of currentChannelUserMap) {
       if (!currentUserInfo) {
         // exited
-        userRow.status = USER_STATUS.EXITED;
+        userRow.status = KakaoUserStatus.Exited;
         userRow.lastExitedAt = currentDate;
         repositories.user.save(userRow);
       }
@@ -95,8 +95,8 @@ export class SyncChannelCommand extends KakaoOpenCommand {
           name: currentUserInfo.nickname,
           profileImageUrl: currentUserInfo.fullProfileURL,
           channelId: channelRow.id,
-          status: USER_STATUS.INACTIVATED,
-          level: USER_LEVEL.NEWBIE,
+          status: KakaoUserStatus.Inactivated,
+          level: KakaoUserLevel.Newbie,
           activityScore: 0,
           lastEnteredAt: currentDate,
           lastExitedAt: currentDate,

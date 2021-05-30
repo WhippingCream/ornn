@@ -1,23 +1,25 @@
-import { DiscordGuildEntity } from './discord/guild.entity';
-import { GroupUserRelationsEntity } from './group-user-relations.entity';
-import { GroupEntity } from './group.entity';
-import { KakaoChannelEntity } from './kakao/channel.entity';
-import { KakaoCredentialEntity } from './kakao/credential.entity';
-import { KakaoUserEntity } from './kakao/user.entity';
-import { RiotMatchEntity } from './riot/match.entity';
-import { RiotMatchParticipantEntity } from './riot/match.participant.entity';
-import { RiotSummonerEntity } from './riot/summoner.entity';
-import { UserEntity } from './user.entity';
+import { DiscordGuildsEntity } from './discord/guild.entity';
+import { KakaoChannelsEntity } from './kakao/channel.entity';
+import { KakaoCredentialsEntity } from './kakao/credential.entity';
+import { KakaoUsersEntity } from './kakao/user.entity';
+import { LeagueMatchesEntity } from './league/match.entity';
+import { LeagueMatchParticipantsEntity } from './league/match.participant.entity';
+import { LeagueSummonersEntity } from './league/summoner.entity';
+import { OauthCredentialsEntity } from './oauth/credentials.entity';
+import { OrnnGroupUserRelationsEntity } from './ornn/group-user-relations.entity';
+import { OrnnGroupsEntity } from './ornn/group.entity';
+import { OrnnUsersEntity } from './ornn/user.entity';
 
 export const entities = [
-  KakaoChannelEntity,
-  KakaoUserEntity,
-  KakaoCredentialEntity,
-  DiscordGuildEntity,
-  RiotSummonerEntity,
-  RiotMatchEntity,
-  RiotMatchParticipantEntity,
-  GroupEntity,
-  UserEntity,
-  GroupUserRelationsEntity,
+  DiscordGuildsEntity,
+  KakaoUsersEntity,
+  KakaoChannelsEntity,
+  KakaoCredentialsEntity,
+  LeagueSummonersEntity,
+  LeagueMatchesEntity,
+  LeagueMatchParticipantsEntity,
+  OrnnUsersEntity,
+  OrnnGroupsEntity,
+  OrnnGroupUserRelationsEntity,
+  OauthCredentialsEntity,
 ];

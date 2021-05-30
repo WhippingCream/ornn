@@ -1,7 +1,7 @@
 import { ChannelType } from 'node-kakao';
 
 export interface IKakaoChannel {
-  kakaoId: string;
+  kakaoId: bigint;
   type: ChannelType;
 
   name: string;

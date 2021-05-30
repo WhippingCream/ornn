@@ -21,14 +21,14 @@ export abstract class ModelBaseService<T> {
     this.entity = entity;
   }
 
-  async getList(): Promise<[T[], number]> {
-    const builder = this.createQueryBuilder();
+  async getList(runner?: QueryRunner): Promise<[T[], number]> {
+    const builder = this.createQueryBuilder(runner);
     const result = await builder.getManyAndCount();
     return result;
   }
 
-  async getOne(id: number): Promise<T> {
-    const builder = this.createQueryBuilder();
+  async getOne(id: number, runner?: QueryRunner): Promise<T> {
+    const builder = this.createQueryBuilder(runner);
     const result = await builder.where('id = :id', { id }).getOne();
     return result;
   }
@@ -45,8 +45,9 @@ export abstract class ModelBaseService<T> {
   async updateOne(
     id: number,
     dto: QueryDeepPartialEntity<T>,
+    runner?: QueryRunner,
   ): Promise<UpdateResult> {
-    const builder = this.createQueryBuilder();
+    const builder = this.createQueryBuilder(runner);
     const result = await builder
       .update()
       .set(dto)
@@ -55,8 +56,8 @@ export abstract class ModelBaseService<T> {
     return result;
   }
 
-  async removeOne(id: number): Promise<DeleteResult> {
-    const builder = this.createQueryBuilder();
+  async removeOne(id: number, runner?: QueryRunner): Promise<DeleteResult> {
+    const builder = this.createQueryBuilder(runner);
     const result = await builder.delete().where('id = :id', { id }).execute();
     return result;
   }
@@ -76,5 +77,9 @@ export abstract class ModelBaseService<T> {
   public createQueryBuilder(runner?: QueryRunner): SelectQueryBuilder<T> {
     const repository: Repository<T> = this.getRepository(runner);
     return repository.createQueryBuilder();
+  }
+
+  public createQueryRunner(): QueryRunner {
+    return this.connection.createQueryRunner();
   }
 }

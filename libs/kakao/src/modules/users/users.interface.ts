@@ -1,5 +1,5 @@
 export interface IKakaoUser {
-  kakaoId: string;
+  kakaoId: bigint;
   perm: number;
   type: number;
   nickName: string;

@@ -1,5 +1,5 @@
 import { ModelBaseController } from '@lib/db/base/base.controller';
-import { KakaoUserEntity } from '@lib/db/entities/kakao/user.entity';
+import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
 import {
   Body,
   Controller,
@@ -24,12 +24,12 @@ export class KakaoUserController extends ModelBaseController {
   }
 
   @Get()
-  findAll(): Promise<[KakaoUserEntity[], number]> {
+  findAll(): Promise<[KakaoUsersEntity[], number]> {
     return this.service.getList();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<KakaoUserEntity> {
+  findOne(@Param('id') id: number): Promise<KakaoUsersEntity> {
     return this.service.getOne(id);
   }
 

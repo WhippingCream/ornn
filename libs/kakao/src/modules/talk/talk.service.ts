@@ -33,7 +33,6 @@ export class KakaoTalkService {
     this.commandMap = new Map<string, KakaoCommand>();
 
     this.commands.forEach((command) => {
-      console.log(command.command, command.aliases);
       if (this.commandMap.has(command.command)) {
         throw new Error(`Command(${command.command}) is already included!`);
       }

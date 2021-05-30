@@ -70,6 +70,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/redis/tsconfig.lib.json"
       }
+    },
+    "auth": {
+      "type": "library",
+      "root": "libs/auth",
+      "entryFile": "index",
+      "sourceRoot": "libs/auth/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/auth/tsconfig.lib.json"
+      }
+    },
+    "ornn": {
+      "type": "library",
+      "root": "libs/ornn",
+      "entryFile": "index",
+      "sourceRoot": "libs/ornn/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/ornn/tsconfig.lib.json"
+      }
     }
   }
 }
