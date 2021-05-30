@@ -100,7 +100,9 @@
       "@lib/utils/(.*)": "<rootDir>/libs/utils/src/$1",
       "@lib/utils": "<rootDir>/libs/utils/src",
       "@lib/redis/(.*)": "<rootDir>/libs/redis/src/$1",
-      "@lib/redis": "<rootDir>/libs/redis/src"
+      "@lib/redis": "<rootDir>/libs/redis/src",
+      "@lib/auth/(.*)": "<rootDir>/libs/auth/src/$1",
+      "@lib/auth": "<rootDir>/libs/auth/src"
     }
   }
 }
