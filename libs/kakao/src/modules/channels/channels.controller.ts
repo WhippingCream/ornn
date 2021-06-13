@@ -11,7 +11,6 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { DeleteResult, InsertResult, UpdateResult } from 'typeorm';
 import { CreateKakaoChannelDto } from './dto/create.channel.dto';
 import { UpdateKakaoChannelDto } from './dto/update.channel.dto';
 import { KakaoChannelService } from './channels.service';
@@ -29,17 +28,16 @@ export class KakaoChannelController extends ModelBaseController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<KakaoChannelsEntity> {
+  findOne(@Param('id') id: number): Promise<KakaoChannelsEntity | undefined> {
     return this.service.getOne(id);
   }
 
   @Post()
   @HttpCode(201) // created
-  async createOne(
+  createOne(
     @Body() createDto: CreateKakaoChannelDto,
-  ): Promise<InsertResult> {
-    const result = await this.service.createOne(createDto);
-    return result;
+  ): Promise<number | undefined> {
+    return this.service.createOne(createDto);
   }
 
   @Put(':id')
@@ -47,12 +45,12 @@ export class KakaoChannelController extends ModelBaseController {
   updateOne(
     @Param('id') id: number,
     @Body() updateDto: UpdateKakaoChannelDto,
-  ): Promise<UpdateResult> {
+  ): Promise<number> {
     return this.service.updateOne(id, updateDto);
   }
 
   @Delete(':id')
-  removeOne(@Param('id') id: number): Promise<DeleteResult> {
+  removeOne(@Param('id') id: number): Promise<number> {
     return this.service.removeOne(id);
   }
 }

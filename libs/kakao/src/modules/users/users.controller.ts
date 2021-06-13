@@ -11,7 +11,6 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { DeleteResult, InsertResult, UpdateResult } from 'typeorm';
 import { CreateKakaoUserDto } from './dto/create.user.dto';
 import { UpdateKakaoUserDto } from './dto/update.user.dto';
 import { KakaoUserService } from './users.service';
@@ -29,7 +28,7 @@ export class KakaoUserController extends ModelBaseController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<KakaoUsersEntity> {
+  findOne(@Param('id') id: number): Promise<KakaoUsersEntity | undefined> {
     return this.service.getOne(id);
   }
 
@@ -37,7 +36,7 @@ export class KakaoUserController extends ModelBaseController {
   @HttpCode(201) // created
   async createOne(
     @Body() createDto: CreateKakaoUserDto,
-  ): Promise<InsertResult> {
+  ): Promise<number | undefined> {
     const result = await this.service.createOne(createDto);
     return result;
   }
@@ -47,12 +46,12 @@ export class KakaoUserController extends ModelBaseController {
   updateOne(
     @Param('id') id: number,
     @Body() updateDto: UpdateKakaoUserDto,
-  ): Promise<UpdateResult> {
+  ): Promise<number | undefined> {
     return this.service.updateOne(id, updateDto);
   }
 
   @Delete(':id')
-  removeOne(@Param('id') id: number): Promise<DeleteResult> {
+  removeOne(@Param('id') id: number): Promise<number | undefined> {
     return this.service.removeOne(id);
   }
 }

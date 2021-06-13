@@ -60,17 +60,18 @@ export class KakaoTalkService {
     const spacePosition = data.text.indexOf(' ');
     let isHelp = false,
       commandString: string,
-      args: string[],
-      openUserInfo: OpenChannelUserInfo,
-      openChannel: TalkOpenChannel;
+      args: string[] | undefined,
+      openUserInfo: OpenChannelUserInfo | undefined,
+      openChannel: TalkOpenChannel | undefined;
 
     if (spacePosition === -1) {
       commandString = data.text.substr(1);
     } else {
       commandString = data.text.substr(1, spacePosition - 1);
-      args = data.text
-        .substr(data.text.indexOf(' ') + 1)
-        .match(/[A-Za-z0-9가-힣_\.:/-]+|"[^"]+"|'[^']+'/g);
+      args =
+        data.text
+          .substr(data.text.indexOf(' ') + 1)
+          .match(/[A-Za-z0-9가-힣_\.:/-]+|"[^"]+"|'[^']+'/g) || undefined;
     }
 
     if (commandString.charAt(commandString.length - 1) === '?') {
@@ -93,18 +94,17 @@ export class KakaoTalkService {
       if (_channel instanceof TalkOpenChannel) {
         openChannel = _channel;
         openUserInfo = _channel.getUserInfo(data.chat.sender);
-      }
-    }
 
-    if (command instanceof KakaoOpenCommand) {
-      if (!openChannel) {
-        Logger.debug('not openChannel');
-        return {};
-      }
+        if (!openUserInfo) {
+          throw new Error('오픈채널 유저 정보를 가져올 수 없습니다.');
+        }
 
-      if (openChannel && !command.roles.includes(openUserInfo.perm)) {
-        Logger.debug('not have perm');
-        throw new Error('권한이 없습니다.');
+        if (command instanceof KakaoOpenCommand) {
+          if (openChannel && !command.roles.includes(openUserInfo.perm)) {
+            Logger.debug('not have perm');
+            throw new Error('권한이 없습니다.');
+          }
+        }
       }
     }
 
@@ -119,7 +119,7 @@ export class KakaoTalkService {
 
   validateCommandArguments(
     command: KakaoCommand,
-    stringArgs: string[],
+    stringArgs: string[] | undefined,
   ): (string | number | boolean | CommonTime | CommonDate)[] {
     const args: (string | number | boolean | CommonTime | CommonDate)[] = [];
 
@@ -138,7 +138,7 @@ export class KakaoTalkService {
           if (!optional) {
             throw new Error(vem || `${index + 1}번째 인자는 필수입니다.`);
           }
-          args.push(null);
+          args.push('');
           return;
         }
 

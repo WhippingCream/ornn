@@ -1,13 +1,5 @@
 import { OrnnUsersEntity } from '@lib/db/entities/ornn/user.entity';
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
@@ -21,27 +13,15 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Put('sign-in')
-  async signIn(
+  signIn(
     @Body() dto: SignInDto,
   ): Promise<OrnnUsersEntity & { accessToken: string }> {
-    const result = await this.authService.signIn(dto);
-
-    if (!('accessToken' in result)) {
-      throw new BadRequestException('');
-    }
-
-    return result;
+    return this.authService.signIn(dto);
   }
 
   @Put('sign-up')
-  async signUp(@Body() dto: SignUpDto): Promise<OrnnUsersEntity> {
-    const result = await this.authService.signUp(dto);
-
-    if (!(result instanceof OrnnUsersEntity)) {
-      throw new BadRequestException('');
-    }
-
-    return result;
+  signUp(@Body() dto: SignUpDto): Promise<void> {
+    return this.authService.signUp(dto);
   }
 
   @ApiBearerAuth()

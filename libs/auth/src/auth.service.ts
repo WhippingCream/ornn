@@ -1,78 +1,94 @@
 import { OrnnUsersEntity } from '@lib/db/entities/ornn/user.entity';
-import { OrnnErrorMeta } from '@lib/utils/interfaces';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { OrnnUsersService } from 'libs/ornn/src/users/users.service';
+import {
+  AuthError,
+  AuthErrorCode,
+  OauthError,
+  OauthErrorCode,
+} from './auth.errors';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { OauthCredentialsService } from './oauth-credentials.service';
+import { OauthService } from './oauth.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    protected oauthCredentialsService: OauthCredentialsService,
     private jwtService: JwtService,
+    private oauthService: OauthService,
     private ornnUsersService: OrnnUsersService,
+    private oauthCredentialsService: OauthCredentialsService,
   ) {}
 
-  async signUp(dto: SignUpDto): Promise<OrnnUsersEntity | OrnnErrorMeta> {
-    const oauthMeta = await this.oauthCredentialsService.findOne(dto);
+  async signUp(dto: SignUpDto): Promise<void> {
+    const {
+      nickname,
+      profileImage,
+    } = await this.oauthService.getKakaoUserInfoByAdminKey(dto.memberId);
 
-    if (oauthMeta) {
-      return {
-        code: 'ORNN_ERROR__EXISTED_OAUTH_CREDENTIAL',
-        message: 'Already existed credential',
-      };
+    const oauthCredential = await this.oauthCredentialsService.findOne(dto);
+
+    if (oauthCredential) {
+      throw new OauthError(OauthErrorCode.ExistedCredential);
     }
-
-    let insertedUserId: number;
 
     const runner = this.ornnUsersService.createQueryRunner();
     await runner.startTransaction();
     try {
-      const userInsertRes = await this.ornnUsersService.createOne(dto, runner);
-
-      if (!userInsertRes.identifiers.length) {
-        throw new Error('fail to insert user');
-      }
-
-      insertedUserId = userInsertRes.identifiers[0].id;
-
-      const oauthCredentialInsertRes = await this.oauthCredentialsService.createOne(
-        { ...dto, ornnUserId: insertedUserId },
+      const userId = await this.ornnUsersService.createOne(
+        {
+          ...dto,
+          username: nickname,
+          profileImage,
+        },
         runner,
       );
 
-      if (!oauthCredentialInsertRes.identifiers.length) {
-        throw new Error('fail to insert oauth credential');
+      if (!userId) {
+        throw new AuthError(AuthErrorCode.UserCreationFailed);
+      }
+
+      const credentialId = await this.oauthCredentialsService.createOne(
+        { ...dto, ornnUserId: userId },
+        runner,
+      );
+
+      if (!credentialId) {
+        throw new AuthError(AuthErrorCode.CredentialRegistrationFailed);
       }
 
       await runner.commitTransaction();
-    } catch (err) {
+    } catch (e) {
       await runner.rollbackTransaction();
-      return {
-        code: 'ORNN_ERROR',
-        message: err,
-      };
+      await runner.release();
     } finally {
       await runner.release();
     }
-
-    const insertedUser = await this.ornnUsersService.getOne(insertedUserId);
-
-    return insertedUser;
   }
 
   async signIn(
     dto: SignInDto,
-  ): Promise<(OrnnUsersEntity & { accessToken: string }) | OrnnErrorMeta> {
-    const oauthMeta = await this.oauthCredentialsService.findOne(dto);
-
-    if (!oauthMeta) {
-      return null;
+  ): Promise<OrnnUsersEntity & { accessToken: string }> {
+    const credential = await this.oauthCredentialsService.findOne(dto);
+    if (!credential) {
+      throw new OauthError(OauthErrorCode.CannotFindCredential);
     }
 
-    const user = await this.ornnUsersService.getOne(oauthMeta.ornnUserId);
+    const kakaoUser = await this.oauthService.getKakaoUserInfoByAdminKey(
+      credential.memberId,
+    );
+
+    if (!kakaoUser) {
+      throw new OauthError(OauthErrorCode.KakaoGetMeByAdminKey);
+    }
+
+    const user = await this.ornnUsersService.getOne(credential.ornnUserId);
+
+    if (!user) {
+      throw new AuthError(AuthErrorCode.NotRegistered);
+    }
 
     return {
       ...user,

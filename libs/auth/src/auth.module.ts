@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { OrnnModule } from 'libs/ornn/src';
@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { OauthCredentialsService } from './oauth-credentials.service';
+import { OauthService } from './oauth.service';
 
 @Module({
   imports: [
@@ -29,8 +30,9 @@ import { OauthCredentialsService } from './oauth-credentials.service';
       inject: [ConfigService],
     }),
     OrnnModule,
+    HttpModule,
   ],
-  providers: [AuthService, JwtStrategy, OauthCredentialsService],
+  providers: [AuthService, OauthService, JwtStrategy, OauthCredentialsService],
   controllers: [AuthController],
   exports: [AuthService],
 })

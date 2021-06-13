@@ -13,5 +13,5 @@ export class SignInDto implements OauthCredential {
     required: true,
     description: 'oauth 유저 ID',
   })
-  memberId: bigint;
+  memberId: string;
 }

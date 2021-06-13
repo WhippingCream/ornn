@@ -4,7 +4,7 @@ import { CommonDate, CommonTime } from './interfaces';
 const str2boolConverter = (src: string): boolean | null => {
   const stringBool = src.replace(/['"]+/g, '');
 
-  let result = null;
+  let result: boolean | null = null;
   if (stringBool === 'true' || stringBool === 't' || stringBool === '참') {
     result = true;
   } else if (
