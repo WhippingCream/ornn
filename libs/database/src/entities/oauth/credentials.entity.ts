@@ -15,9 +15,9 @@ export class OauthCredentialsEntity extends ModelBaseEntity {
   provider: OauthProvider;
 
   @Column({
-    type: 'bigint',
+    type: 'varchar',
   })
-  memberId: bigint;
+  memberId: string;
 
   @ManyToOne(() => OrnnUsersEntity, (ornnUser) => ornnUser.oauthCredentials, {
     createForeignKeyConstraints: false,

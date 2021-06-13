@@ -11,6 +11,8 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
     "paths": {
       "@lib/db": [
         "libs/database/src"

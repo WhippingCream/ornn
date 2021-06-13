@@ -80,10 +80,7 @@ export class SyncChannelCommand extends KakaoOpenCommand {
       { currentUserInfo, userRow },
     ] of currentChannelUserMap) {
       if (!currentUserInfo) {
-        // exited
-        userRow.status = KakaoUserStatus.Exited;
-        userRow.lastExitedAt = currentDate;
-        repositories.user.save(userRow);
+        throw new Error('현재 유저 정보를 가져올 수 없습니다.');
       }
 
       if (!userRow) {
@@ -101,6 +98,11 @@ export class SyncChannelCommand extends KakaoOpenCommand {
           lastEnteredAt: currentDate,
           lastExitedAt: currentDate,
         });
+      } else if (!currentUserInfo) {
+        // exited
+        userRow.status = KakaoUserStatus.Exited;
+        userRow.lastExitedAt = currentDate;
+        repositories.user.save(userRow);
       }
     }
 

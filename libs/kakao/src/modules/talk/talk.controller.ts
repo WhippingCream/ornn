@@ -79,7 +79,11 @@ export class KakaoTalkController extends ModelBaseController {
               channel.sendChat(
                 new ChatBuilder()
                   .append(new ReplyContent(data.chat))
-                  .text(command ? command.helpMessage : '없는 명령어 입니다.')
+                  .text(
+                    command
+                      ? (command.helpMessage as string)
+                      : '없는 명령어 입니다.',
+                  )
                   .build(KnownChatType.REPLY),
               );
             } else {
@@ -370,7 +374,7 @@ export class KakaoTalkController extends ModelBaseController {
               channelId,
               activeUserCount,
               displayUserList,
-              openLink: { linkId, linkName, linkURL, searchable },
+              openLink,
             } = _channel.info;
 
             const userList = displayUserList.map(({ userId, nickname }) => ({
@@ -381,10 +385,10 @@ export class KakaoTalkController extends ModelBaseController {
             channels.push({
               id: channelId.toString(),
               activeUserCount,
-              linkId: linkId.toString(),
-              linkName,
-              linkURL,
-              searchable,
+              linkId: openLink?.linkId.toString(),
+              linkName: openLink?.linkName,
+              linkURL: openLink?.linkURL,
+              searchable: openLink?.searchable,
               userList,
             });
           }
@@ -398,23 +402,21 @@ export class KakaoTalkController extends ModelBaseController {
   }
 
   async _login(): AsyncCommandResult<LoginResult> {
-    const {
-      email,
-      password,
-      clientName,
-      deviceId,
-    } = await this.credentialService.getOne(1);
+    const credential = await this.credentialService.getOne(1);
 
-    if (!email || !password) {
+    if (!credential || !credential.email || !credential.password) {
       throw new ForbiddenException({
         message: 'Email and password is not existed',
       });
     }
 
-    const api = await AuthApiClient.create(clientName, encode(deviceId));
+    const api = await AuthApiClient.create(
+      credential.clientName,
+      encode(credential.deviceId),
+    );
     const loginRes = await api.login({
-      email,
-      password,
+      email: credential.email,
+      password: credential.password,
 
       // This option force login even other devices are logon
       forced: true,
@@ -457,6 +459,10 @@ export class KakaoTalkController extends ModelBaseController {
       Long.fromString(dto.channelId),
     );
 
+    if (!channel) {
+      throw new Error('채널 정보를 가져오는데 실패했습니다.');
+    }
+
     const chatBuilder = new ChatBuilder();
 
     dto.tokens.forEach(({ type, content }) => {
@@ -469,6 +475,10 @@ export class KakaoTalkController extends ModelBaseController {
           const userInfo = channel.getUserInfo({
             userId: Long.fromString(content),
           });
+
+          if (!userInfo) {
+            throw new Error('유저 정보를 가져오는데 실패하였습니다.');
+          }
 
           chatBuilder.append(new MentionContent(userInfo));
         }

@@ -16,6 +16,11 @@ export class OrnnUsersEntity extends ModelBaseEntity {
   username: string;
 
   @Column({
+    type: 'varchar',
+  })
+  profileImage?: string;
+
+  @Column({
     type: 'enum',
     enum: Gender,
     nullable: true,

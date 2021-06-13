@@ -26,14 +26,9 @@ export class KakaoAuthController extends ModelBaseController {
 
   @Put('request-passcord')
   async requestPasscord(): Promise<void> {
-    const {
-      email,
-      password,
-      clientName,
-      deviceId,
-    } = await this.credentialService.getOne(1);
+    const credential = await this.credentialService.getOne(1);
 
-    if (!email || !password) {
+    if (!credential || !credential.email || !credential.password) {
       throw new ForbiddenException({
         message: 'Email and password is not existed',
       });
@@ -42,14 +37,14 @@ export class KakaoAuthController extends ModelBaseController {
     try {
       if (!this.authService.client) {
         this.authService.client = await AuthApiClient.create(
-          clientName,
-          encode(deviceId),
+          credential.clientName,
+          encode(credential.deviceId),
         );
       }
 
       const loginForm = {
-        email,
-        password,
+        email: credential.email,
+        password: credential.password,
         forced: true,
       };
 
@@ -88,14 +83,9 @@ export class KakaoAuthController extends ModelBaseController {
   async registerDevice(
     @Body() { passcord }: KakaoRegisterDeviceDto,
   ): Promise<void> {
-    const {
-      email,
-      password,
-      clientName,
-      deviceId,
-    } = await this.credentialService.getOne(1);
+    const credential = await this.credentialService.getOne(1);
 
-    if (!email || !password) {
+    if (!credential || !credential.email || !credential.password) {
       throw new ForbiddenException({
         message: 'Email and password is not existed',
       });
@@ -104,14 +94,14 @@ export class KakaoAuthController extends ModelBaseController {
     try {
       if (!this.authService.client) {
         this.authService.client = await AuthApiClient.create(
-          clientName,
-          deviceId,
+          credential.clientName,
+          credential.deviceId,
         );
       }
 
       const loginForm = {
-        email,
-        password,
+        email: credential.email,
+        password: credential.password,
         forced: true,
       };
 
