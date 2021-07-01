@@ -3,6 +3,7 @@ import { OrnnError } from '@lib/utils/error';
 export class DatabaseError extends OrnnError {
   constructor(code: DatabaseErrorCode, query?: string) {
     super(
+      500,
       'ERR_DB',
       code,
       DatabaseErrorMessages.get(code) ||
