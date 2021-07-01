@@ -31,7 +31,7 @@ export class AuthService {
     const oauthCredential = await this.oauthCredentialsService.findOne(dto);
 
     if (oauthCredential) {
-      throw new OauthError(OauthErrorCode.ExistedCredential);
+      throw new OauthError(400, OauthErrorCode.ExistedCredential);
     }
 
     const runner = this.ornnUsersService.createQueryRunner();
@@ -47,7 +47,7 @@ export class AuthService {
       );
 
       if (!userId) {
-        throw new AuthError(AuthErrorCode.UserCreationFailed);
+        throw new AuthError(500, AuthErrorCode.UserCreationFailed);
       }
 
       const credentialId = await this.oauthCredentialsService.createOne(
@@ -56,7 +56,7 @@ export class AuthService {
       );
 
       if (!credentialId) {
-        throw new AuthError(AuthErrorCode.CredentialRegistrationFailed);
+        throw new AuthError(500, AuthErrorCode.CredentialRegistrationFailed);
       }
 
       await runner.commitTransaction();
@@ -73,7 +73,7 @@ export class AuthService {
   ): Promise<OrnnUsersEntity & { accessToken: string }> {
     const credential = await this.oauthCredentialsService.findOne(dto);
     if (!credential) {
-      throw new OauthError(OauthErrorCode.CannotFindCredential);
+      throw new OauthError(404, OauthErrorCode.CannotFindCredential);
     }
 
     const kakaoUser = await this.oauthService.getKakaoUserInfoByAdminKey(
@@ -81,13 +81,13 @@ export class AuthService {
     );
 
     if (!kakaoUser) {
-      throw new OauthError(OauthErrorCode.KakaoGetMeByAdminKey);
+      throw new OauthError(500, OauthErrorCode.KakaoGetMeByAdminKey);
     }
 
     const user = await this.ornnUsersService.getOne(credential.ornnUserId);
 
     if (!user) {
-      throw new AuthError(AuthErrorCode.NotRegistered);
+      throw new AuthError(400, AuthErrorCode.NotRegistered);
     }
 
     return {

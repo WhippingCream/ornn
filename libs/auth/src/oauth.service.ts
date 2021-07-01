@@ -39,7 +39,7 @@ export class OauthService {
       })
       .toPromise();
 
-    if (!data) throw new OauthError(OauthErrorCode.KakaoGetMeByAdminKey);
+    if (!data) throw new OauthError(500, OauthErrorCode.KakaoGetMeByAdminKey);
 
     return {
       id: data.id,
@@ -58,7 +58,8 @@ export class OauthService {
       })
       .toPromise();
 
-    if (!data) throw new OauthError(OauthErrorCode.KakaoGetMeByAccessToken);
+    if (!data)
+      throw new OauthError(500, OauthErrorCode.KakaoGetMeByAccessToken);
 
     return {
       id: data.id,

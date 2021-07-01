@@ -1,8 +1,9 @@
 import { OrnnError } from '@lib/utils/error';
 
 export class AuthError extends OrnnError {
-  constructor(code: AuthErrorCode) {
+  constructor(status: number, code: AuthErrorCode) {
     super(
+      status,
       'ERR_AUTH',
       code,
       AuthErrorMessages.get(code) ||
@@ -28,8 +29,9 @@ const AuthErrorMessages = new Map<AuthErrorCode, string>([
 ]);
 
 export class OauthError extends OrnnError {
-  constructor(code: OauthErrorCode) {
+  constructor(status: number, code: OauthErrorCode) {
     super(
+      status,
       'ERR_OAUTH',
       code,
       OauthErrorMessages.get(code) ||
