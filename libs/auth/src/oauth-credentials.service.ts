@@ -26,4 +26,13 @@ export class OauthCredentialsService extends ModelBaseService<OauthCredentialsEn
       .andWhere('memberId = :memberId')
       .getOne();
   }
+
+  async findOneByUserId(
+    userId: number,
+    runner?: QueryRunner,
+  ): Promise<OauthCredentialsEntity | undefined> {
+    const qb = this.createQueryBuilder(runner);
+
+    return await qb.where(`ornnUserId = ${userId}`).getOne();
+  }
 }

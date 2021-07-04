@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 import { DatabaseExceptionFilter } from '@lib/db/database-exception.filter';
 import { OrnnUsersEntity } from '@lib/db/entities/ornn/user.entity';
 import {
@@ -10,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+
 import {
   AuthExceptionFilter,
   OAuthExceptionFilter,
@@ -19,6 +21,13 @@ import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+
+interface RequestWithUser extends Request {
+  user: {
+    userId: number;
+    username: string;
+  };
+}
 
 @ApiTags('오른 인증 v1')
 @Controller('api/v1/auth')
@@ -38,6 +47,13 @@ export class AuthController {
   @Put('sign-up')
   signUp(@Body() dto: SignUpDto): Promise<void> {
     return this.authService.signUp(dto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Put('withdrawal')
+  withdrawal(@Req() req: RequestWithUser) {
+    return this.authService.withdrawal(req.user.userId);
   }
 
   @ApiBearerAuth()
