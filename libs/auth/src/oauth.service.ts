@@ -1,11 +1,10 @@
 import { HttpService, Injectable } from '@nestjs/common';
+
 import { ConfigService } from '@nestjs/config';
-import { OauthError, OauthErrorCode } from './auth.errors';
 import { OauthCredentialsService } from './oauth-credentials.service';
-import { KakaoUser } from './types';
 
 interface GetKakaoUserResponse {
-  id: string;
+  id: bigint;
   kakao_account?: {
     profile?: {
       nickname: string;
@@ -23,48 +22,51 @@ export class OauthService {
     protected oauthCredentialsService: OauthCredentialsService,
   ) {}
 
-  async getKakaoUserInfoByAdminKey(kakaoUserId: string): Promise<KakaoUser> {
-    const { data } = await this.httpService
-      .get<GetKakaoUserResponse>('https://kapi.kakao.com/v2/user/me', {
-        headers: {
-          Authorization: `Bearer ${this.configService.get(
-            'AUTHORIZATION_KAKAO_ADMIN_KEY',
-          )}`,
-          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-        params: {
-          target_id_type: 'user_id',
-          target_id: kakaoUserId,
-        },
-      })
-      .toPromise();
+  async validateKakaoUser(kakaoUserId: string): Promise<string | undefined> {
+    let userId: string | undefined = undefined;
 
-    if (!data) throw new OauthError(500, OauthErrorCode.KakaoGetMeByAdminKey);
+    try {
+      const { data } = await this.httpService
+        .get<GetKakaoUserResponse>('https://kapi.kakao.com/v2/user/me', {
+          headers: {
+            Authorization: `KakaoAK ${this.configService.get(
+              'AUTHORIZATION_KAKAO_ADMIN_KEY',
+            )}`,
+          },
+          params: {
+            target_id_type: 'user_id',
+            target_id: kakaoUserId,
+          },
+        })
+        .toPromise();
 
-    return {
-      id: data.id,
-      nickname: data.kakao_account?.profile?.nickname,
-      profileImage: data.kakao_account?.profile?.profile_image_url,
-    };
+      userId = `${data.id}`;
+    } catch (e) {}
+
+    return userId;
   }
 
-  async getKakaoUserInfoByAccessToken(accessToken: string): Promise<KakaoUser> {
-    const { data } = await this.httpService
-      .get<GetKakaoUserResponse>('https://kapi.kakao.com/v2/user/me', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-      })
-      .toPromise();
+  async unlinkKakaoUser(kakaoUserId: string): Promise<string | undefined> {
+    let userId: string | undefined = undefined;
 
-    if (!data)
-      throw new OauthError(500, OauthErrorCode.KakaoGetMeByAccessToken);
+    try {
+      const { data } = await this.httpService
+        .get<GetKakaoUserResponse>('https://kapi.kakao.com/v1/user/unlink', {
+          headers: {
+            Authorization: `KakaoAK ${this.configService.get(
+              'AUTHORIZATION_KAKAO_ADMIN_KEY',
+            )}`,
+          },
+          params: {
+            target_id_type: 'user_id',
+            target_id: kakaoUserId,
+          },
+        })
+        .toPromise();
 
-    return {
-      id: data.id,
-      nickname: data.kakao_account?.profile?.nickname,
-      profileImage: data.kakao_account?.profile?.profile_image_url,
-    };
+      userId = `${data.id}`;
+    } catch (e) {}
+
+    return userId;
   }
 }

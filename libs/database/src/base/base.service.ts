@@ -6,10 +6,10 @@ import {
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
-
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { ModelBaseEntity } from './base.entity';
 import { DatabaseError, DatabaseErrorCode } from '../database.errors';
+
+import { ModelBaseEntity } from './base.entity';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 export abstract class ModelBaseService<T extends ModelBaseEntity> {
   protected connection: Connection;

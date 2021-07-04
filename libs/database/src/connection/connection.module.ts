@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { CONNECTION } from '../constants/connection';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { entities } from '../entities';
 
 @Module({
@@ -26,11 +27,12 @@ import { entities } from '../entities';
         password:
           configService.get(`DATABASE_${CONNECTION.DEFAULT_NAME}_PASS`) ||
           'pass',
-        database:
-          configService.get(`DATABASE_${CONNECTION.DEFAULT_NAME}_NAME`) ||
-          'zoo',
+        database: configService.get(`DATABASE_${CONNECTION.DEFAULT_NAME}_NAME`),
         synchronize: true,
         timezone: 'Z',
+        logging:
+          configService.get(`DATABASE_${CONNECTION.DEFAULT_NAME}_LOGGING`) ===
+          '1',
         extra: {
           charset: 'utf8mb4_unicode_ci',
         },
