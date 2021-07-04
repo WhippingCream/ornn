@@ -1,78 +1,87 @@
-import { OrnnUsersEntity } from '@lib/db/entities/ornn/user.entity';
-import { OrnnErrorMeta } from '@lib/utils/interfaces';
+import {
+  AuthError,
+  AuthErrorCode,
+  OauthError,
+  OauthErrorCode,
+} from './auth.errors';
+
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { OauthCredentialsService } from './oauth-credentials.service';
+import { OauthService } from './oauth.service';
+import { OrnnUsersEntity } from '@lib/db/entities/ornn/user.entity';
 import { OrnnUsersService } from 'libs/ornn/src/users/users.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { OauthCredentialsService } from './oauth-credentials.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    protected oauthCredentialsService: OauthCredentialsService,
     private jwtService: JwtService,
+    private oauthService: OauthService,
     private ornnUsersService: OrnnUsersService,
+    private oauthCredentialsService: OauthCredentialsService,
   ) {}
 
-  async signUp(dto: SignUpDto): Promise<OrnnUsersEntity | OrnnErrorMeta> {
-    const oauthMeta = await this.oauthCredentialsService.findOne(dto);
+  async signUp(dto: SignUpDto): Promise<void> {
+    const memberId = await this.oauthService.validateKakaoUser(dto.memberId);
 
-    if (oauthMeta) {
-      return {
-        code: 'ORNN_ERROR__EXISTED_OAUTH_CREDENTIAL',
-        message: 'Already existed credential',
-      };
+    if (!memberId || memberId !== dto.memberId) {
+      throw new OauthError(400, OauthErrorCode.KakaoUserValidationFailed);
     }
 
-    let insertedUserId: number;
+    const oauthCredential = await this.oauthCredentialsService.findOne(dto);
+
+    if (oauthCredential) {
+      throw new OauthError(400, OauthErrorCode.ExistedCredential);
+    }
 
     const runner = this.ornnUsersService.createQueryRunner();
     await runner.startTransaction();
     try {
-      const userInsertRes = await this.ornnUsersService.createOne(dto, runner);
+      const userId = await this.ornnUsersService.createOne(dto, runner);
 
-      if (!userInsertRes.identifiers.length) {
-        throw new Error('fail to insert user');
+      if (!userId) {
+        throw new AuthError(500, AuthErrorCode.UserCreationFailed);
       }
 
-      insertedUserId = userInsertRes.identifiers[0].id;
-
-      const oauthCredentialInsertRes = await this.oauthCredentialsService.createOne(
-        { ...dto, ornnUserId: insertedUserId },
+      const credentialId = await this.oauthCredentialsService.createOne(
+        { ...dto, ornnUserId: userId },
         runner,
       );
 
-      if (!oauthCredentialInsertRes.identifiers.length) {
-        throw new Error('fail to insert oauth credential');
+      if (!credentialId) {
+        throw new AuthError(500, AuthErrorCode.CredentialRegistrationFailed);
       }
 
       await runner.commitTransaction();
-    } catch (err) {
+    } catch (e) {
       await runner.rollbackTransaction();
-      return {
-        code: 'ORNN_ERROR',
-        message: err,
-      };
+      await runner.release();
     } finally {
       await runner.release();
     }
-
-    const insertedUser = await this.ornnUsersService.getOne(insertedUserId);
-
-    return insertedUser;
   }
 
   async signIn(
     dto: SignInDto,
-  ): Promise<(OrnnUsersEntity & { accessToken: string }) | OrnnErrorMeta> {
-    const oauthMeta = await this.oauthCredentialsService.findOne(dto);
-
-    if (!oauthMeta) {
-      return null;
+  ): Promise<OrnnUsersEntity & { accessToken: string }> {
+    const credential = await this.oauthCredentialsService.findOne(dto);
+    if (!credential) {
+      throw new OauthError(404, OauthErrorCode.CannotFindCredential);
     }
 
-    const user = await this.ornnUsersService.getOne(oauthMeta.ornnUserId);
+    const memberId = await this.oauthService.validateKakaoUser(dto.memberId);
+
+    if (!memberId || memberId !== dto.memberId) {
+      throw new OauthError(400, OauthErrorCode.KakaoUserValidationFailed);
+    }
+
+    const user = await this.ornnUsersService.getOne(credential.ornnUserId);
+
+    if (!user) {
+      throw new AuthError(400, AuthErrorCode.NotRegistered);
+    }
 
     return {
       ...user,
@@ -81,5 +90,36 @@ export class AuthService {
         sub: user.id,
       }),
     };
+  }
+
+  async withdrawal(userId: number): Promise<void> {
+    const credential = await this.oauthCredentialsService.findOneByUserId(
+      userId,
+    );
+    if (!credential) {
+      throw new OauthError(404, OauthErrorCode.CannotFindCredential);
+    }
+
+    const user = await this.ornnUsersService.getOne(userId);
+
+    if (!user) {
+      throw new AuthError(400, AuthErrorCode.NotRegistered);
+    }
+
+    const runner = this.ornnUsersService.createQueryRunner();
+    await runner.startTransaction();
+    try {
+      await this.ornnUsersService.removeOne(user.id, runner);
+      await this.oauthCredentialsService.removeOne(credential.id, runner);
+      await this.oauthService.unlinkKakaoUser(credential.memberId);
+
+      await runner.commitTransaction();
+    } catch (e) {
+      await runner.rollbackTransaction();
+      await runner.release();
+      throw new AuthError(500, AuthErrorCode.UserCreationFailed);
+    } finally {
+      await runner.release();
+    }
   }
 }

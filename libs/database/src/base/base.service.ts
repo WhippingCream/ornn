@@ -1,18 +1,17 @@
 import {
   Connection,
-  DeleteResult,
+  EntityManager,
   EntityTarget,
-  InsertResult,
   QueryRunner,
   Repository,
   SelectQueryBuilder,
-  UpdateResult,
 } from 'typeorm';
+import { DatabaseError, DatabaseErrorCode } from '../database.errors';
 
-import { InternalServerErrorException } from '@nestjs/common';
+import { ModelBaseEntity } from './base.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
-export abstract class ModelBaseService<T> {
+export abstract class ModelBaseService<T extends ModelBaseEntity> {
   protected connection: Connection;
   protected entity: EntityTarget<T>;
 
@@ -21,53 +20,80 @@ export abstract class ModelBaseService<T> {
     this.entity = entity;
   }
 
+  getManager(): EntityManager {
+    return this.connection.manager;
+  }
+
   async getList(runner?: QueryRunner): Promise<[T[], number]> {
-    const builder = this.createQueryBuilder(runner);
-    const result = await builder.getManyAndCount();
+    const qb = this.createQueryBuilder(runner);
+    let result: [T[], number];
+    try {
+      result = await qb.getManyAndCount();
+    } catch (err) {
+      throw new DatabaseError(DatabaseErrorCode.GetListFailed, qb.getQuery());
+    }
     return result;
   }
 
-  async getOne(id: number, runner?: QueryRunner): Promise<T> {
-    const builder = this.createQueryBuilder(runner);
-    const result = await builder.where('id = :id', { id }).getOne();
+  async getOne(id: number, runner?: QueryRunner): Promise<T | undefined> {
+    const qb = this.createQueryBuilder(runner);
+    let result: T | undefined;
+    try {
+      result = await qb.where('id = :id', { id }).getOne();
+    } catch (err) {
+      throw new DatabaseError(DatabaseErrorCode.GetOneFailed, qb.getQuery());
+    }
     return result;
   }
 
   async createOne(
     dto: QueryDeepPartialEntity<T>,
     runner?: QueryRunner,
-  ): Promise<InsertResult> {
-    const builder = this.createQueryBuilder(runner);
-    const result = await builder.insert().values(dto).execute();
-    return result;
+  ): Promise<number | undefined> {
+    const qb = this.createQueryBuilder(runner);
+    let id: number | undefined;
+
+    try {
+      const result = await qb.insert().values(dto).execute();
+      if (result.identifiers.length) {
+        id = result.identifiers[0].id;
+      }
+    } catch (e) {
+      throw new DatabaseError(DatabaseErrorCode.CreateFailed, qb.getQuery());
+    }
+
+    return id;
   }
 
   async updateOne(
     id: number,
     dto: QueryDeepPartialEntity<T>,
     runner?: QueryRunner,
-  ): Promise<UpdateResult> {
-    const builder = this.createQueryBuilder(runner);
-    const result = await builder
-      .update()
-      .set(dto)
-      .where('id = :id', { id })
-      .execute();
-    return result;
+  ): Promise<number> {
+    const qb = this.createQueryBuilder(runner);
+    try {
+      await qb.update().set(dto).where('id = :id', { id }).execute();
+    } catch (err) {
+      throw new DatabaseError(DatabaseErrorCode.UpdateFailed, qb.getQuery());
+    }
+
+    return id;
   }
 
-  async removeOne(id: number, runner?: QueryRunner): Promise<DeleteResult> {
-    const builder = this.createQueryBuilder(runner);
-    const result = await builder.delete().where('id = :id', { id }).execute();
-    return result;
+  async removeOne(id: number, runner?: QueryRunner): Promise<number> {
+    const qb = this.createQueryBuilder(runner);
+    try {
+      await qb.delete().where('id = :id', { id }).execute();
+      return id;
+    } catch (err) {
+      throw new DatabaseError(DatabaseErrorCode.DeleteFailed, qb.getQuery());
+    }
   }
 
-  protected getRepository(runner?: QueryRunner) {
+  protected getRepository(runner?: QueryRunner): Repository<T> {
     if (!!runner) {
       if (!runner.isTransactionActive) {
-        throw new InternalServerErrorException(
-          'QueryRunner is exist, but transaction is not started',
-        );
+        throw new DatabaseError(DatabaseErrorCode.TransactionIsNotStarted);
       }
       return runner.manager.getRepository(this.entity);
     }
@@ -75,8 +101,8 @@ export abstract class ModelBaseService<T> {
   }
 
   public createQueryBuilder(runner?: QueryRunner): SelectQueryBuilder<T> {
-    const repository: Repository<T> = this.getRepository(runner);
-    return repository.createQueryBuilder();
+    const result = this.getRepository(runner);
+    return result.createQueryBuilder();
   }
 
   public createQueryRunner(): QueryRunner {

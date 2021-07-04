@@ -1,19 +1,20 @@
 import { DateParameter, EnumParameter, StringParameter } from '@lib/utils';
 import { Gender } from '@lib/utils/enumerations';
+
 import { SignInDto } from './sign-in.dto';
 
 export class SignUpDto extends SignInDto {
-  @StringParameter({
-    required: true,
-    description: '사용자 명',
-  })
-  username: string;
-
   @EnumParameter(Gender, {
     required: true,
     description: '성별',
   })
   gender: Gender;
+
+  @StringParameter({
+    required: true,
+    description: '별명',
+  })
+  username: string;
 
   @DateParameter({
     required: true,

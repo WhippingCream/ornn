@@ -63,7 +63,7 @@ export class RegisterChannelCommand extends KakaoOpenCommand {
             kakaoId: channel.channelId.toBigInt(),
             type: channel.info.type,
             name: channel.getDisplayName(),
-            coverUrl: channel.info.openLink.linkCoverURL,
+            coverUrl: channel.info.openLink?.linkCoverURL,
           })
           .execute();
 

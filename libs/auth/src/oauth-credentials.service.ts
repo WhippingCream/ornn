@@ -18,12 +18,21 @@ export class OauthCredentialsService extends ModelBaseService<OauthCredentialsEn
   async findOne(
     credential: OauthCredential,
     runner?: QueryRunner,
-  ): Promise<OauthCredentialsEntity> {
-    const builder = this.createQueryBuilder(runner);
-    const result = await builder
+  ): Promise<OauthCredentialsEntity | undefined> {
+    const qb = this.createQueryBuilder(runner);
+
+    return await qb
       .where('provider = :provider', credential)
       .andWhere('memberId = :memberId')
       .getOne();
-    return result;
+  }
+
+  async findOneByUserId(
+    userId: number,
+    runner?: QueryRunner,
+  ): Promise<OauthCredentialsEntity | undefined> {
+    const qb = this.createQueryBuilder(runner);
+
+    return await qb.where(`ornnUserId = ${userId}`).getOne();
   }
 }

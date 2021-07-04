@@ -1,10 +1,11 @@
-import { ModelBaseEntity } from '@lib/db/base/base.entity';
-import { Gender } from '@lib/utils/enumerations';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { OrnnGroupUserRelationsEntity } from './group-user-relations.entity';
+
+import { Gender } from '@lib/utils/enumerations';
 import { KakaoUsersEntity } from '../kakao/user.entity';
 import { LeagueSummonersEntity } from '../league/summoner.entity';
+import { ModelBaseEntity } from '@lib/db/base/base.entity';
 import { OauthCredentialsEntity } from '../oauth/credentials.entity';
+import { OrnnGroupUserRelationsEntity } from './group-user-relations.entity';
 
 @Entity({
   name: 'OrnnUsers',

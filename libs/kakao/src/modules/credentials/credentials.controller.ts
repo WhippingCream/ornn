@@ -3,7 +3,6 @@ import { KakaoCredentialsEntity } from '@lib/db/entities/kakao/credential.entity
 import { Body, Controller, Get, HttpCode, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { generateString, generateUUID } from '@lib/utils/generators';
-import { UpdateResult } from 'typeorm';
 import { UpdateKakaoCredentialDto } from './dto/update.kakao-credential.dto';
 import { KakaoCredentialService } from './credentials.service';
 
@@ -15,7 +14,7 @@ export class KakaoCredentialController extends ModelBaseController {
   }
 
   @Get()
-  async find(): Promise<KakaoCredentialsEntity> {
+  async find(): Promise<KakaoCredentialsEntity | undefined> {
     let result = await this.service.getOne(1);
     if (!result) {
       await this.service.createOne({
@@ -31,18 +30,17 @@ export class KakaoCredentialController extends ModelBaseController {
 
   @Put()
   @HttpCode(204) // no content
-  async updateOne(
-    @Body() updateDto: UpdateKakaoCredentialDto,
-  ): Promise<UpdateResult> {
+  async updateOne(@Body() updateDto: UpdateKakaoCredentialDto): Promise<void> {
     const found = await this.service.getOne(1);
+
     if (!found) {
-      return await this.service.createOne({
+      await this.service.createOne({
         deviceId: generateUUID(4),
         clientName: `DESKTOP-${generateString(7)}`,
         ...updateDto,
       });
     }
 
-    return this.service.updateOne(1, updateDto);
+    this.service.updateOne(1, updateDto);
   }
 }
