@@ -5660,6 +5660,11 @@ snapdragon@^0.8.1:
     source-map-resolve "^0.5.0"
     use "^3.1.0"
 
+snekfetch@^3.6.4:
+  version "3.6.4"
+  resolved "https://registry.yarnpkg.com/snekfetch/-/snekfetch-3.6.4.tgz#d13e80a616d892f3d38daae4289f4d258a645120"
+  integrity sha512-NjxjITIj04Ffqid5lqr7XdgwM7X61c/Dns073Ly170bPQHLm6jkmelye/eglS++1nfTWktpP6Y2bFXjdPlQqdw==
+
 source-list-map@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/source-list-map/-/source-list-map-2.0.1.tgz#3993bd873bfc48479cca9ea3a547835c7c154b34"
@@ -6451,6 +6456,13 @@ wcwidth@^1.0.1:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
+
+webhook-discord@^3.7.7:
+  version "3.7.7"
+  resolved "https://registry.yarnpkg.com/webhook-discord/-/webhook-discord-3.7.7.tgz#54ea6072dad352a0b68276c2a2f7360835f67e26"
+  integrity sha512-qlEucVfun4ZzIhIJGQt8g9ytlSMpnaXiZeOiJCuuGUSSnkmBW5oFFcJHxN0KzC3VgUI0Brkl/i5X0Wf/ljKVXQ==
+  dependencies:
+    snekfetch "^3.6.4"
 
 webidl-conversions@^5.0.0:
   version "5.0.0"
