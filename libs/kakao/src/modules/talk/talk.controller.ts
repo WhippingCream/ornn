@@ -12,7 +12,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { ApiTags } from '@nestjs/swagger';
-import * as dayjs from 'dayjs';
 import { encode } from 'js-base64';
 import {
   AsyncCommandResult,
@@ -48,15 +47,26 @@ import {
 import { SendMessageDto } from './dto/send.message.dto';
 import { KakaoTalkService } from './talk.service';
 
+import { Webhook } from 'webhook-discord';
+
 @ApiTags('카카오 톡 기능 v1')
 @Controller('/api/v1/kakao/talk')
 export class KakaoTalkController extends ModelBaseController {
+  webhookClient: Webhook | undefined;
   constructor(
     protected credentialService: KakaoCredentialService,
     protected talkService: KakaoTalkService,
     protected configService: ConfigService,
   ) {
     super();
+
+    const webhookURL = this.configService.get(
+      'KAKAO_BOT_EVENT_DISCORD_WEBHOOK_LINK',
+    ) as string;
+
+    if (webhookURL) {
+      this.webhookClient = new Webhook(webhookURL);
+    }
 
     this.talkService.client.on(
       'chat',
@@ -138,10 +148,17 @@ export class KakaoTalkController extends ModelBaseController {
     );
 
     this.talkService.client.on('error', (err: unknown): void => {
+      if (this.webhookClient)
+        this.webhookClient.err(
+          '앨리스 봇 Event Callback',
+          `error (err: ${err})`,
+        );
       Logger.error(`[Kakao] Client error!! err: ${err}`);
     });
 
     this.talkService.client.on('switch_server', (): void => {
+      if (this.webhookClient)
+        this.webhookClient.warn('앨리스 봇 Event Callback', `switch_server`);
       Logger.log('[Kakao] Server switching requested.');
       this._login()
         .then((result) => {
@@ -155,6 +172,11 @@ export class KakaoTalkController extends ModelBaseController {
     });
 
     this.talkService.client.on('disconnected', (reason: number): void => {
+      if (this.webhookClient)
+        this.webhookClient.err(
+          '앨리스 봇 Event Callback',
+          `disconnected (reason: ${reason})`,
+        );
       Logger.error(`[Kakao] Disconnected!! reason: ${reason}`);
       this._login()
         .then((result) => {
@@ -174,6 +196,11 @@ export class KakaoTalkController extends ModelBaseController {
         channel: TalkChannel,
         feed: DeleteAllFeed,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `chat_deleted (${feed.logId} deleted by ${feedChatlog.sender.userId})`,
+          );
         Logger.log(
           `[Kakao] ${feed.logId} deleted by ${feedChatlog.sender.userId}`,
         );
@@ -183,6 +210,11 @@ export class KakaoTalkController extends ModelBaseController {
     this.talkService.client.on(
       'link_created',
       (link: InformedOpenLink): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `link_created (${link.openLink.linkId} url: ${link.openLink.linkURL})`,
+          );
         Logger.log(
           `[Kakao] Link created: ${link.openLink.linkId} url: ${link.openLink.linkURL}`,
         );
@@ -192,6 +224,11 @@ export class KakaoTalkController extends ModelBaseController {
     this.talkService.client.on(
       'link_deleted',
       (link: InformedOpenLink): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `link_deleted (${link.openLink.linkId} url: ${link.openLink.linkURL})`,
+          );
         Logger.log(
           `[Kakao] Link deleted: ${link.openLink.linkId} url: ${link.openLink.linkURL}`,
         );
@@ -207,6 +244,11 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         feed: ChatFeeds,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `user_join (User ${user.nickname} (${user.userId}) joined channel ${channel.channelId})`,
+          );
         Logger.log(
           `[Kakao] User ${user.nickname} (${user.userId}) joined channel ${channel.channelId}`,
         );
@@ -222,6 +264,11 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         feed: ChatFeeds,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `user_left (User ${user.nickname} (${user.userId}) left channel ${channel.channelId})`,
+          );
         Logger.log(
           `[Kakao] User ${user.nickname} (${user.userId}) left channel ${channel.channelId}`,
         );
@@ -235,6 +282,11 @@ export class KakaoTalkController extends ModelBaseController {
         lastInfo: OpenChannelUserInfo,
         user: OpenLinkChannelUserInfo,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `profile_changed (Profile of ${user.userId} changed. From name: ${lastInfo.nickname} profile: ${lastInfo.profileURL})`,
+          );
         Logger.log(
           `[Kakao] Profile of ${user.userId} changed. From name: ${lastInfo.nickname} profile: ${lastInfo.profileURL}`,
         );
@@ -248,6 +300,11 @@ export class KakaoTalkController extends ModelBaseController {
         lastInfo: OpenChannelUserInfo,
         user: OpenChannelUserInfo,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `perm_changed (Perm of ${user.userId} changed. From ${lastInfo.perm} to ${user.perm})`,
+          );
         Logger.log(
           `[Kakao] Perm of ${user.userId} changed. From ${lastInfo.perm} to ${user.perm}`,
         );
@@ -255,10 +312,20 @@ export class KakaoTalkController extends ModelBaseController {
     );
 
     this.talkService.client.on('channel_join', (channel: TalkChannel): void => {
+      if (this.webhookClient)
+        this.webhookClient.info(
+          '앨리스 봇 Event Callback',
+          `channel_join (Joining channel ${channel.getDisplayName()})`,
+        );
       Logger.log(`[Kakao] Joining channel ${channel.getDisplayName()}`);
     });
 
     this.talkService.client.on('channel_left', (channel: TalkChannel): void => {
+      if (this.webhookClient)
+        this.webhookClient.info(
+          '앨리스 봇 Event Callback',
+          `channel_left (Leaving channel ${channel.getDisplayName()})`,
+        );
       Logger.log(`[Kakao] Leaving channel ${channel.getDisplayName()}`);
     });
 
@@ -270,6 +337,11 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         feed: OpenRewriteFeed,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `message_hidden (Message ${hideLog.logId} hid from ${channel.channelId} by ${hideLog.sender.userId})`,
+          );
         Logger.log(
           `[Kakao] Message ${hideLog.logId} hid from ${channel.channelId} by ${hideLog.sender.userId}`,
         );
@@ -284,6 +356,11 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         feed: OpenLinkDeletedFeed,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `channel_link_deleted (Open channel (${channel.channelId}) link has been deleted)`,
+          );
         Logger.log(
           `[Kakao] Open channel (${channel.channelId}) link has been deleted`,
         );
@@ -295,6 +372,11 @@ export class KakaoTalkController extends ModelBaseController {
       (channel: TalkOpenChannel, lastLink: OpenLink, link: OpenLink): void => {
         const lastOwnerNick = lastLink.linkOwner.nickname;
         const newOwnerNick = link.linkOwner.nickname;
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `host_handover (OpenLink host handover on channel ${channel.channelId} from ${lastOwnerNick} to ${newOwnerNick})`,
+          );
 
         Logger.log(
           `[Kakao] OpenLink host handover on channel ${channel.channelId} from ${lastOwnerNick} to ${newOwnerNick}`,
@@ -310,6 +392,11 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         feed: OpenKickFeed,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.warn(
+            '앨리스 봇 Event Callback',
+            `channel_kicked (Kicked from channel ${channel.channelId})`,
+          );
         Logger.log(`[Kakao] Kicked from channel ${channel.channelId}`);
       },
     );
@@ -320,6 +407,11 @@ export class KakaoTalkController extends ModelBaseController {
         type: number,
         newMeta: SetChannelMeta,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `meta_change (Meta changed from ${channel.channelId} type: ${type} meta: ${newMeta.content} by ${newMeta.authorId})`,
+          );
         Logger.log(
           `[Kakao] Meta changed from ${channel.channelId} type: ${type} meta: ${newMeta.content} by ${newMeta.authorId}`,
         );
@@ -336,6 +428,11 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         chat: ChatLoggedType,
       ): void => {
+        if (this.webhookClient)
+          this.webhookClient.info(
+            '앨리스 봇 Event Callback',
+            `chat_event (${author.nickname} touched hearts ${count} times)`,
+          );
         channel.sendChat(`${author.nickname} touched hearts ${count} times`);
       },
     );
@@ -488,9 +585,10 @@ export class KakaoTalkController extends ModelBaseController {
     channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
   }
 
-  @Cron('0 */5 * * * *') // every 5 minutes
+  @Cron('0 */1 * * * *') // every 5 minutes
   logonStatusMonitor() {
     const { logon } = this.talkService.client;
-    Logger.log(`${dayjs().format('YYYY.MM.DD HH:mm:ss')} LogOn(${logon})`);
+    if (this.webhookClient)
+      this.webhookClient.info('앨리스 봇', `카카오톡 로그인 여부 (${logon})`);
   }
 }
