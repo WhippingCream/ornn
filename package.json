@@ -41,7 +41,7 @@
     "dotenv": "^8.2.0",
     "js-base64": "^3.6.0",
     "mysql": "^2.18.1",
-    "node-kakao": "^4.2.3",
+    "node-kakao": "^4.3.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "readline-sync": "^1.4.10",
