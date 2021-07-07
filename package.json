@@ -50,7 +50,8 @@
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
     "swagger-ui-express": "^4.1.6",
-    "typeorm": "^0.2.31"
+    "typeorm": "^0.2.31",
+    "webhook-discord": "^3.7.7"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.5.1",
