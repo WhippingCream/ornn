@@ -4592,10 +4592,10 @@ node-int64@^0.4.0:
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
   integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
-node-kakao@^4.2.3:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/node-kakao/-/node-kakao-4.2.3.tgz#39effc3dca9e27788110b3eca055467296feb7fb"
-  integrity sha512-1vnqdU6X2pzfSj+8/LZOJ++CzUgrq0lTmmpYB9v5PFQHTgBgZrK5TCwWu3Qe+hjTLs+sfDo27SO+hiV0Rt+QRg==
+node-kakao@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/node-kakao/-/node-kakao-4.3.0.tgz#133b1c9fa8b9b1783afec3567d18df0c3283d095"
+  integrity sha512-P5HI+LNtV7/EfiQl+ixzOdCysv8ghSnepCA9zTUveslaGaMuGkOEbNvVM7dgQfPKKyJFt46dYck3zOmdczsAMA==
   dependencies:
     axios "^0.21.1"
     bson "^4.2.2"
