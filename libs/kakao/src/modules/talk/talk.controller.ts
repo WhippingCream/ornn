@@ -511,6 +511,7 @@ export class KakaoTalkController extends ModelBaseController {
       credential.clientName,
       encode(credential.deviceId),
     );
+
     const loginRes = await api.login({
       email: credential.email,
       password: credential.password,
@@ -536,17 +537,12 @@ export class KakaoTalkController extends ModelBaseController {
       });
     }
 
-    try {
-      const res = await this._login();
+    const res = await this._login();
 
-      if (!res.success) {
-        throw new Error(`Login failed with status: ${res.status}`);
-      }
-    } catch (err) {
-      throw new InternalServerErrorException({
-        message: 'register device failed',
-        err,
-      });
+    if (!res.success) {
+      throw new InternalServerErrorException(
+        `Login failed with status: ${res.status}`,
+      );
     }
   }
 
