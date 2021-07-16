@@ -1,4 +1,5 @@
 import { ModelBaseController } from '@lib/db/base/base.controller';
+import { DiscordWebhookService } from '@lib/utils/webhook/discord-webhook.service';
 import {
   BadRequestException,
   Body,
@@ -19,16 +20,11 @@ import {
   LoginResult,
   ChannelUserInfo,
   ChatFeeds,
-  ChatLoggedType,
-  DeleteAllFeed,
   InformedOpenLink,
   KnownChatType,
   OpenChannelUserInfo,
-  OpenKickFeed,
   OpenLink,
   OpenLinkChannelUserInfo,
-  OpenLinkDeletedFeed,
-  OpenRewriteFeed,
   SetChannelMeta,
   TalkChannel,
   TalkChatData,
@@ -38,6 +34,7 @@ import {
   ChatBuilder,
   MentionContent,
   ReplyContent,
+  OpenChannelUserPerm,
 } from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
 import {
@@ -47,26 +44,16 @@ import {
 import { SendMessageDto } from './dto/send.message.dto';
 import { KakaoTalkService } from './talk.service';
 
-import { Webhook } from 'webhook-discord';
-
 @ApiTags('카카오 톡 기능 v1')
 @Controller('/api/v1/kakao/talk')
 export class KakaoTalkController extends ModelBaseController {
-  webhookClient: Webhook | undefined;
   constructor(
     protected credentialService: KakaoCredentialService,
     protected talkService: KakaoTalkService,
     protected configService: ConfigService,
+    protected discordWebhookService: DiscordWebhookService,
   ) {
     super();
-
-    const webhookURL = this.configService.get(
-      'KAKAO_BOT_EVENT_DISCORD_WEBHOOK_LINK',
-    ) as string;
-
-    if (webhookURL) {
-      this.webhookClient = new Webhook(webhookURL);
-    }
 
     this.talkService.client.on(
       'chat',
@@ -148,90 +135,92 @@ export class KakaoTalkController extends ModelBaseController {
     );
 
     this.talkService.client.on('error', (err: unknown): void => {
-      if (this.webhookClient)
-        this.webhookClient.err(
-          '앨리스 봇 Event Callback',
-          `error (err: ${err})`,
-        );
-      Logger.error(`[Kakao] Client error!! err: ${err}`);
+      this.discordWebhookService.error({
+        name: 'Elise Bot',
+        title: 'Error',
+        text: `\`\`\`json\n${JSON.stringify(err, null, 2)}\n\`\`\``,
+      });
     });
 
     this.talkService.client.on('switch_server', (): void => {
-      if (this.webhookClient)
-        this.webhookClient.warn('앨리스 봇 Event Callback', `switch_server`);
-      Logger.log('[Kakao] Server switching requested.');
-      this._login()
-        .then((result) => {
-          if (result.success) {
-            Logger.log('[Kakao] Success to auto login!');
-          }
-        })
-        .catch((reason) => {
-          Logger.warn(`[Kakao] Fail to auto login(${reason})!`);
-        });
+      this.discordWebhookService.warning({
+        name: 'Elise Bot',
+        title: 'Switch Server',
+      });
     });
 
     this.talkService.client.on('disconnected', (reason: number): void => {
-      if (this.webhookClient)
-        this.webhookClient.err(
-          '앨리스 봇 Event Callback',
-          `disconnected (reason: ${reason})`,
-        );
-      Logger.error(`[Kakao] Disconnected!! reason: ${reason}`);
-      this._login()
-        .then((result) => {
-          if (result.success) {
-            Logger.log('[Kakao] Success to auto login!');
-          }
-        })
-        .catch((reason) => {
-          Logger.warn(`[Kakao] Fail to auto login(${reason})!`);
-        });
+      this.discordWebhookService.error({
+        name: 'Elise Bot',
+        title: 'Disconnected',
+        text: `(reason: ${reason})`,
+      });
     });
 
     this.talkService.client.on(
       'chat_deleted',
-      (
+      async (
         feedChatlog: Readonly<TypedChatlog<KnownChatType.FEED>>,
         channel: TalkChannel,
-        feed: DeleteAllFeed,
-      ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `chat_deleted (${feed.logId} deleted by ${feedChatlog.sender.userId})`,
-          );
-        Logger.log(
-          `[Kakao] ${feed.logId} deleted by ${feedChatlog.sender.userId}`,
+        // feed: DeleteAllFeed,
+      ): Promise<void> => {
+        const userInfo = channel.getUserInfo(feedChatlog.sender);
+        const logId = Long.fromNumber(
+          JSON.parse(feedChatlog.text as string).logId,
         );
+        const chat = await channel.chatListStore.get(logId);
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Chat Deleted',
+          author: {
+            author: userInfo?.nickname ?? 'unknown',
+            iconURL: userInfo?.profileURL,
+          },
+          fields: [
+            {
+              title: 'Deleted Message',
+              value: `${chat?.text}`,
+              inline: false,
+            },
+          ],
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
     this.talkService.client.on(
       'link_created',
       (link: InformedOpenLink): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `link_created (${link.openLink.linkId} url: ${link.openLink.linkURL})`,
-          );
-        Logger.log(
-          `[Kakao] Link created: ${link.openLink.linkId} url: ${link.openLink.linkURL}`,
-        );
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Link Created',
+          text: `(url: ${link.openLink.linkURL})`,
+          footer: {
+            footer: link.openLink.linkName,
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
     this.talkService.client.on(
       'link_deleted',
       (link: InformedOpenLink): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `link_deleted (${link.openLink.linkId} url: ${link.openLink.linkURL})`,
-          );
-        Logger.log(
-          `[Kakao] Link deleted: ${link.openLink.linkId} url: ${link.openLink.linkURL}`,
-        );
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Link Deleted',
+          text: `(url: ${link.openLink.linkURL})`,
+          footer: {
+            footer: link.openLink.linkName,
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -244,14 +233,19 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         feed: ChatFeeds,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `user_join (User ${user.nickname} (${user.userId}) joined channel ${channel.channelId})`,
-          );
-        Logger.log(
-          `[Kakao] User ${user.nickname} (${user.userId}) joined channel ${channel.channelId}`,
-        );
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'User Join',
+          author: {
+            author: user.nickname,
+            iconURL: user.profileURL,
+          },
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -264,14 +258,19 @@ export class KakaoTalkController extends ModelBaseController {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         feed: ChatFeeds,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `user_left (User ${user.nickname} (${user.userId}) left channel ${channel.channelId})`,
-          );
-        Logger.log(
-          `[Kakao] User ${user.nickname} (${user.userId}) left channel ${channel.channelId}`,
-        );
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'User Left',
+          author: {
+            author: user.nickname,
+            iconURL: user.profileURL,
+          },
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -282,14 +281,32 @@ export class KakaoTalkController extends ModelBaseController {
         lastInfo: OpenChannelUserInfo,
         user: OpenLinkChannelUserInfo,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `profile_changed (Profile of ${user.userId} changed. From name: ${lastInfo.nickname} profile: ${lastInfo.profileURL})`,
-          );
-        Logger.log(
-          `[Kakao] Profile of ${user.userId} changed. From name: ${lastInfo.nickname} profile: ${lastInfo.profileURL}`,
-        );
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Profile Changed',
+          author: {
+            author: lastInfo.nickname,
+            iconURL: lastInfo.profileURL,
+          },
+          fields: [
+            {
+              title: 'Change Log',
+              value: `\`\`\`json\n${JSON.stringify(
+                {
+                  from: lastInfo.nickname,
+                  to: user.nickname,
+                },
+                null,
+                2,
+              )}\n\`\`\``,
+            },
+          ],
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -300,51 +317,112 @@ export class KakaoTalkController extends ModelBaseController {
         lastInfo: OpenChannelUserInfo,
         user: OpenChannelUserInfo,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `perm_changed (Perm of ${user.userId} changed. From ${lastInfo.perm} to ${user.perm})`,
-          );
-        Logger.log(
-          `[Kakao] Perm of ${user.userId} changed. From ${lastInfo.perm} to ${user.perm}`,
-        );
+        const permToString = (perm: OpenChannelUserPerm) => {
+          switch (perm) {
+            case OpenChannelUserPerm.OWNER:
+              return 'Owner';
+            case OpenChannelUserPerm.MANAGER:
+              return 'Manager';
+            case OpenChannelUserPerm.BOT:
+              return 'Bot';
+            case OpenChannelUserPerm.NONE:
+              return 'Member';
+          }
+        };
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Permission Changed',
+          author: {
+            author: channel.info.openLink?.linkOwner.nickname as string,
+            iconURL: channel.info.openLink?.linkOwner.profileURL as string,
+          },
+          fields: [
+            {
+              title: 'Change Log',
+              value: `\`\`\`json\n${JSON.stringify(
+                {
+                  user: user.nickname,
+                  from: permToString(lastInfo.perm),
+                  to: permToString(user.perm),
+                },
+                null,
+                2,
+              )}\n\`\`\``,
+            },
+          ],
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
     this.talkService.client.on('channel_join', (channel: TalkChannel): void => {
-      if (this.webhookClient)
-        this.webhookClient.info(
-          '앨리스 봇 Event Callback',
-          `channel_join (Joining channel ${channel.getDisplayName()})`,
-        );
-      Logger.log(`[Kakao] Joining channel ${channel.getDisplayName()}`);
+      this.discordWebhookService.info({
+        name: 'Elise Bot',
+        title: 'Channel Join',
+        footer: {
+          footer: channel.getDisplayName(),
+          footerIcon:
+            'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+        },
+      });
     });
 
     this.talkService.client.on('channel_left', (channel: TalkChannel): void => {
-      if (this.webhookClient)
-        this.webhookClient.info(
-          '앨리스 봇 Event Callback',
-          `channel_left (Leaving channel ${channel.getDisplayName()})`,
-        );
-      Logger.log(`[Kakao] Leaving channel ${channel.getDisplayName()}`);
+      this.discordWebhookService.info({
+        name: 'Elise Bot',
+        title: 'Channel Left',
+        footer: {
+          footer: channel.getDisplayName(),
+          footerIcon:
+            'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+        },
+      });
     });
 
     this.talkService.client.on(
       'message_hidden',
-      (
+      async (
         hideLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
         channel: TalkOpenChannel,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        feed: OpenRewriteFeed,
-      ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `message_hidden (Message ${hideLog.logId} hid from ${channel.channelId} by ${hideLog.sender.userId})`,
-          );
-        Logger.log(
-          `[Kakao] Message ${hideLog.logId} hid from ${channel.channelId} by ${hideLog.sender.userId}`,
-        );
+        // feed: OpenRewriteFeed,
+      ): Promise<void> => {
+        const author = channel.getUserInfo(hideLog.sender);
+        const logId = Long.fromNumber(JSON.parse(hideLog.text as string).logId);
+        const chat = await channel.chatListStore.get(logId);
+        const userInfo = chat
+          ? channel.getUserInfo({
+              userId: chat?.sender.userId,
+            })
+          : null;
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Message Hidden',
+          author: {
+            author: author?.nickname ?? 'unknown',
+            iconURL: author?.profileURL,
+          },
+          fields: [
+            {
+              title: 'Deleted Message Sender',
+              value: `${userInfo?.nickname ?? 'Not text'}`,
+              inline: false,
+            },
+            {
+              title: 'Deleted Message',
+              value: `${chat?.text}`,
+              inline: false,
+            },
+          ],
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -353,34 +431,40 @@ export class KakaoTalkController extends ModelBaseController {
       (
         feedLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
         channel: TalkOpenChannel,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        feed: OpenLinkDeletedFeed,
+        // feed: OpenLinkDeletedFeed,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `channel_link_deleted (Open channel (${channel.channelId}) link has been deleted)`,
-          );
-        Logger.log(
-          `[Kakao] Open channel (${channel.channelId}) link has been deleted`,
-        );
+        this.discordWebhookService.warning({
+          name: 'Elise Bot',
+          title: 'Channel Link Deleted',
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
     this.talkService.client.on(
       'host_handover',
       (channel: TalkOpenChannel, lastLink: OpenLink, link: OpenLink): void => {
-        const lastOwnerNick = lastLink.linkOwner.nickname;
-        const newOwnerNick = link.linkOwner.nickname;
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `host_handover (OpenLink host handover on channel ${channel.channelId} from ${lastOwnerNick} to ${newOwnerNick})`,
-          );
-
-        Logger.log(
-          `[Kakao] OpenLink host handover on channel ${channel.channelId} from ${lastOwnerNick} to ${newOwnerNick}`,
-        );
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Host Handover',
+          author: {
+            author: lastLink.linkOwner.nickname,
+            iconURL: lastLink.linkOwner.profileURL,
+          },
+          fields: [
+            { title: 'From', value: `${lastLink.linkOwner.nickname}` },
+            { title: 'To', value: `${link.linkOwner.nickname}` },
+          ],
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -389,17 +473,20 @@ export class KakaoTalkController extends ModelBaseController {
       (
         kickedLog: Readonly<TypedChatlog<KnownChatType.FEED>>,
         channel: TalkOpenChannel,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        feed: OpenKickFeed,
+        // feed: OpenKickFeed,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.warn(
-            '앨리스 봇 Event Callback',
-            `channel_kicked (Kicked from channel ${channel.channelId})`,
-          );
-        Logger.log(`[Kakao] Kicked from channel ${channel.channelId}`);
+        this.discordWebhookService.warning({
+          name: 'Elise Bot',
+          title: 'Channel Kicked',
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
+
     this.talkService.client.on(
       'meta_change',
       (
@@ -407,14 +494,28 @@ export class KakaoTalkController extends ModelBaseController {
         type: number,
         newMeta: SetChannelMeta,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `meta_change (Meta changed from ${channel.channelId} type: ${type} meta: ${newMeta.content} by ${newMeta.authorId})`,
-          );
-        Logger.log(
-          `[Kakao] Meta changed from ${channel.channelId} type: ${type} meta: ${newMeta.content} by ${newMeta.authorId}`,
-        );
+        const userInfo = channel.getUserInfo({
+          userId: newMeta.authorId,
+        });
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Channel Meta Changed',
+          author: {
+            author: userInfo?.nickname ?? 'unknown',
+            iconURL: userInfo?.profileURL,
+          },
+          fields: [
+            {
+              title: 'New Meta',
+              value: newMeta.content,
+            },
+          ],
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -425,15 +526,27 @@ export class KakaoTalkController extends ModelBaseController {
         author: OpenChannelUserInfo,
         type: number,
         count: number,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        chat: ChatLoggedType,
+        // chat: ChatLoggedType,
       ): void => {
-        if (this.webhookClient)
-          this.webhookClient.info(
-            '앨리스 봇 Event Callback',
-            `chat_event (${author.nickname} touched hearts ${count} times)`,
-          );
-        channel.sendChat(`${author.nickname} touched hearts ${count} times`);
+        this.discordWebhookService.info({
+          name: 'Elise Bot',
+          title: 'Chat Event',
+          author: {
+            author: author.nickname,
+            iconURL: author.profileURL,
+          },
+          fields: [
+            {
+              title: 'How many touched',
+              value: `${count} times`,
+            },
+          ],
+          footer: {
+            footer: channel.getDisplayName(),
+            footerIcon:
+              'https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/453a624d017900001.png',
+          },
+        });
       },
     );
 
@@ -581,10 +694,17 @@ export class KakaoTalkController extends ModelBaseController {
     channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
   }
 
-  @Cron('0 */1 * * * *') // every 5 minutes
+  @Cron('0 */5 * * * *') // every 5 minutes
   logonStatusMonitor() {
     const { logon } = this.talkService.client;
-    if (this.webhookClient)
-      this.webhookClient.info('앨리스 봇', `카카오톡 로그인 여부 (${logon})`);
+    this.discordWebhookService.info({
+      name: 'Elise Bot',
+      fields: [
+        {
+          title: 'Is activated?',
+          value: `${logon}`,
+        },
+      ],
+    });
   }
 }
