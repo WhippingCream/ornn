@@ -99,38 +99,6 @@ export class KakaoTalkController extends ModelBaseController {
             );
           }
         }
-
-        // Logger.debug(
-        //   [
-        //     '[Kakao] channel: ',
-        //     channel.info.channelId,
-        //     channel.info.type,
-        //     channel.getDisplayName(),
-        //   ].join(' '),
-        // );
-        // Logger.debug(
-        //   [
-        //     '[Kakao] sender: ',
-        //     sender.userId,
-        //     sender.userType,
-        //     sender.nickname,
-        //   ].join(' '),
-        // );
-        // Logger.debug(
-        //   [
-        //     '[Kakao] chat: ',
-        //     data.chat.type,
-        //     data.chat.messageId,
-        //     data.chat.text,
-        //   ].join(' '),
-        // );
-        // Logger.debug(
-        //   [
-        //     '[Kakao] attachment: ',
-        //     data.chat.attachment?.mentions,
-        //     data.chat.supplement,
-        //   ].join(' '),
-        // );
       },
     );
 
@@ -145,7 +113,7 @@ export class KakaoTalkController extends ModelBaseController {
     this.talkService.client.on('switch_server', (): void => {
       this.discordWebhookService.warning({
         name: 'Elise Bot',
-        title: 'Switch Server',
+        title: 'Server Switched',
       });
     });
 
@@ -178,7 +146,7 @@ export class KakaoTalkController extends ModelBaseController {
           },
           fields: [
             {
-              title: 'Deleted Message',
+              title: 'Contents',
               value: `${chat?.text}`,
               inline: false,
             },
@@ -331,7 +299,7 @@ export class KakaoTalkController extends ModelBaseController {
         };
         this.discordWebhookService.info({
           name: 'Elise Bot',
-          title: 'Permission Changed',
+          title: 'User Permission Changed',
           author: {
             author: channel.info.openLink?.linkOwner.nickname as string,
             iconURL: channel.info.openLink?.linkOwner.profileURL as string,
@@ -362,7 +330,7 @@ export class KakaoTalkController extends ModelBaseController {
     this.talkService.client.on('channel_join', (channel: TalkChannel): void => {
       this.discordWebhookService.info({
         name: 'Elise Bot',
-        title: 'Channel Join',
+        title: 'Join Channel',
         footer: {
           footer: channel.getDisplayName(),
           footerIcon:
@@ -374,7 +342,7 @@ export class KakaoTalkController extends ModelBaseController {
     this.talkService.client.on('channel_left', (channel: TalkChannel): void => {
       this.discordWebhookService.info({
         name: 'Elise Bot',
-        title: 'Channel Left',
+        title: 'Left Channel',
         footer: {
           footer: channel.getDisplayName(),
           footerIcon:
@@ -407,12 +375,12 @@ export class KakaoTalkController extends ModelBaseController {
           },
           fields: [
             {
-              title: 'Deleted Message Sender',
-              value: `${userInfo?.nickname ?? 'Not text'}`,
+              title: 'Sender',
+              value: `${userInfo?.nickname}`,
               inline: false,
             },
             {
-              title: 'Deleted Message',
+              title: 'Content',
               value: `${chat?.text}`,
               inline: false,
             },
@@ -694,7 +662,7 @@ export class KakaoTalkController extends ModelBaseController {
     channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
   }
 
-  @Cron('0 */5 * * * *') // every 5 minutes
+  @Cron('0 0 */1 * * *') // every an hour
   logonStatusMonitor() {
     const { logon } = this.talkService.client;
     this.discordWebhookService.info({
