@@ -1,4 +1,3 @@
-import * as dayjs from 'dayjs';
 import { CommonDate, CommonTime } from './interfaces';
 
 const str2boolConverter = (src: string): boolean | null => {
@@ -32,17 +31,17 @@ const str2numConverter = (src: string): number | null => {
 const str2timeConverter = (src: string): CommonTime | null => {
   // HH:mm
   if (/^([01]\d|2[0-3]):?([0-5]\d)$/.test(src)) {
-    const datetime = dayjs(src, 'HH:mm');
-    return { hour: datetime.hour(), minute: datetime.minute() };
+    const [hour, minute] = src.split(':');
+    return { hour: parseInt(hour, 10), minute: parseInt(minute, 10) };
   }
 
   // HH:mm:dd
   if (/^([01]\d|2[0-3]):?([0-5]\d):?([0-5]\d)$/.test(src)) {
-    const datetime = dayjs(src, 'HH:mm:ss');
+    const [hour, minute, second] = src.split(':');
     return {
-      hour: datetime.hour(),
-      minute: datetime.minute(),
-      second: datetime.second(),
+      hour: parseInt(hour, 10),
+      minute: parseInt(minute, 10),
+      second: parseInt(second, 10),
     };
   }
 
@@ -55,8 +54,8 @@ const str2dateConverter = (src: string): CommonDate | null => {
 
   // MM-dd
   if (/^(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$/.test(_src)) {
-    const datetime = dayjs(_src, 'MM-dd');
-    return { month: datetime.month() + 1, day: datetime.date() };
+    const [month, day] = src.split(':');
+    return { month: parseInt(month, 10), day: parseInt(day, 10) };
   }
 
   return null;

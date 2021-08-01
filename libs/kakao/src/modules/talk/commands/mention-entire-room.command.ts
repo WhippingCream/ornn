@@ -1,3 +1,4 @@
+import { COMMAND_ARGUMENT_TYPE, KakaoOpenCommand } from './base.command';
 import {
   ChatBuilder,
   KnownChatType,
@@ -7,8 +8,10 @@ import {
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
-import { COMMAND_ARGUMENT_TYPE, KakaoOpenCommand } from './base.command';
 
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
 export class MentionEntireRoomCommand extends KakaoOpenCommand {
   constructor() {
     super({

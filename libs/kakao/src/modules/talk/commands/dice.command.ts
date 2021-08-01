@@ -1,3 +1,4 @@
+import { COMMAND_ARGUMENT_TYPE, KakaoCommand } from './base.command';
 import {
   ChatBuilder,
   KnownChatType,
@@ -5,8 +6,10 @@ import {
   TalkChannel,
   TalkChatData,
 } from 'node-kakao';
-import { COMMAND_ARGUMENT_TYPE, KakaoCommand } from './base.command';
 
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
 export class DiceCommand extends KakaoCommand {
   constructor() {
     super({

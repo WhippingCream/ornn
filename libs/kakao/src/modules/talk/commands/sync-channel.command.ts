@@ -1,8 +1,5 @@
-import { CONNECTION } from '@lib/db/constants/connection';
-import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
-import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
-import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import * as dayjs from 'dayjs';
+
 import {
   ChatBuilder,
   KnownChatType,
@@ -12,14 +9,21 @@ import {
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
-import { getManager } from 'typeorm';
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
+
+import { CONNECTION } from '@lib/db/constants/connection';
+import { Injectable } from '@nestjs/common';
+import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
 import { KakaoOpenCommand } from './base.command';
+import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
+import { getManager } from 'typeorm';
 
 interface User {
   currentUserInfo?: OpenChannelUserInfo;
   userRow?: KakaoUsersEntity;
 }
 
+@Injectable()
 export class SyncChannelCommand extends KakaoOpenCommand {
   constructor() {
     super({

@@ -1,12 +1,10 @@
-import { kakaoCommands } from '@lib/kakao/commands';
 import {
   COMMAND_ARGUMENT_TYPE,
   KakaoCommand,
   KakaoOpenCommand,
-} from '@lib/kakao/commands/base.command';
-import { Injectable, Logger } from '@nestjs/common';
-import { converters } from '@lib/utils/converters';
+} from '@lib/kakao/modules/talk/commands/base.command';
 import { CommonDate, CommonTime } from '@lib/utils/interfaces';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   OpenChannelUserInfo,
   TalkChannel,
@@ -14,6 +12,22 @@ import {
   TalkClient,
   TalkOpenChannel,
 } from 'node-kakao';
+
+import { CacheCommand } from './commands/cache-test.command';
+import { CoinFlipCommand } from './commands/flip-coin.command';
+import { DiceCommand } from './commands/dice.command';
+import { GetReadersCommand } from './commands/get-readers.command';
+import { MentionByStatusCommand } from './commands/mention-by-status.command';
+import { MentionEntireRoomCommand } from './commands/mention-entire-room.command';
+import { ParamTestCommand } from './commands/param-test.command';
+import { PartyCreateCommand } from './commands/party.command/party-create.command';
+import { PartyExitCommand } from './commands/party.command/party-exit.command';
+import { PartyJoinCommand } from './commands/party.command/party-join.command';
+import { PartyPrintListCommand } from './commands/party.command/party-print-list.command';
+import { PartyUpdateTimeCommand } from './commands/party.command/party-update-time.command';
+import { RegisterChannelCommand } from './commands/register-channel.command';
+import { SyncChannelCommand } from './commands/sync-channel.command';
+import { converters } from '@lib/utils/converters';
 
 interface ParsedCommand {
   isHelp?: boolean;
@@ -25,10 +39,38 @@ interface ParsedCommand {
 
 @Injectable()
 export class KakaoTalkService {
-  constructor() {
+  constructor(
+    protected readonly diceCommand: DiceCommand,
+    protected readonly coinFlipCommand: CoinFlipCommand,
+    protected readonly cacheCommand: CacheCommand,
+    protected readonly paramTestCommand: ParamTestCommand,
+    protected readonly getReadersCommand: GetReadersCommand,
+    protected readonly registerChannelCommand: RegisterChannelCommand,
+    protected readonly syncChannelCommand: SyncChannelCommand,
+    protected readonly mentionEntireRoomCommand: MentionEntireRoomCommand,
+    protected readonly mentionByStatusCommand: MentionByStatusCommand,
+    protected readonly partyCreateCommand: PartyCreateCommand,
+    protected readonly partyPrintListCommand: PartyPrintListCommand,
+    protected readonly partyJoinCommand: PartyJoinCommand,
+    protected readonly partyExitCommand: PartyExitCommand,
+    protected readonly partyUpdateTimeCommand: PartyUpdateTimeCommand,
+  ) {
     this.client = new TalkClient();
     this.commands = [
-      ...kakaoCommands.map((CommandClass) => new CommandClass()),
+      this.diceCommand,
+      this.coinFlipCommand,
+      this.cacheCommand,
+      this.paramTestCommand,
+      this.getReadersCommand,
+      this.registerChannelCommand,
+      this.syncChannelCommand,
+      this.mentionEntireRoomCommand,
+      this.mentionByStatusCommand,
+      this.partyCreateCommand,
+      this.partyPrintListCommand,
+      this.partyJoinCommand,
+      this.partyExitCommand,
+      this.partyUpdateTimeCommand,
     ];
     this.commandMap = new Map<string, KakaoCommand>();
 

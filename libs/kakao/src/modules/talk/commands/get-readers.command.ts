@@ -5,8 +5,11 @@ import {
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
+
+import { Injectable } from '@nestjs/common';
 import { KakaoOpenCommand } from './base.command';
 
+@Injectable()
 export class GetReadersCommand extends KakaoOpenCommand {
   constructor() {
     super({

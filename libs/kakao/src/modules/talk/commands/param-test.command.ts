@@ -1,4 +1,4 @@
-import { CommonDate, CommonTime } from '@lib/utils/interfaces';
+import { COMMAND_ARGUMENT_TYPE, KakaoCommand } from './base.command';
 import {
   ChatBuilder,
   KnownChatType,
@@ -6,8 +6,11 @@ import {
   TalkChannel,
   TalkChatData,
 } from 'node-kakao';
-import { COMMAND_ARGUMENT_TYPE, KakaoCommand } from './base.command';
+import { CommonDate, CommonTime } from '@lib/utils/interfaces';
 
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
 export class ParamTestCommand extends KakaoCommand {
   constructor() {
     super({

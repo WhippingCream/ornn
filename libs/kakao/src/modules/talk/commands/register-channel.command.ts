@@ -1,8 +1,5 @@
-import { CONNECTION } from '@lib/db/constants/connection';
-import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
-import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
-import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import * as dayjs from 'dayjs';
+
 import {
   ChatBuilder,
   KnownChatType,
@@ -11,9 +8,15 @@ import {
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
-import { getManager } from 'typeorm';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
+
+import { CONNECTION } from '@lib/db/constants/connection';
+import { Injectable } from '@nestjs/common';
+import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
 import { KakaoOpenCommand } from './base.command';
+import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { getManager } from 'typeorm';
 
 const getLevel = (origin: OpenChannelUserPerm) => {
   switch (origin) {
@@ -28,6 +31,7 @@ const getLevel = (origin: OpenChannelUserPerm) => {
   }
 };
 
+@Injectable()
 export class RegisterChannelCommand extends KakaoOpenCommand {
   constructor() {
     super({

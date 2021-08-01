@@ -1,4 +1,3 @@
-import { CommonDate, CommonTime } from '@lib/utils/interfaces';
 import {
   AsyncCommandResult,
   Chatlog,
@@ -7,6 +6,7 @@ import {
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
+import { CommonDate, CommonTime } from '@lib/utils/interfaces';
 
 export enum COMMAND_ARGUMENT_TYPE {
   BOOLEAN = 'boolean',

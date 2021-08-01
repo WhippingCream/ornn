@@ -1,7 +1,4 @@
-import { CONNECTION } from '@lib/db/constants/connection';
-import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
-import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
-import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
+import { COMMAND_ARGUMENT_TYPE, KakaoOpenCommand } from './base.command';
 import {
   ChatBuilder,
   KnownChatType,
@@ -11,8 +8,13 @@ import {
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
+
+import { CONNECTION } from '@lib/db/constants/connection';
+import { Injectable } from '@nestjs/common';
+import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
+import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
 import { getManager } from 'typeorm';
-import { COMMAND_ARGUMENT_TYPE, KakaoOpenCommand } from './base.command';
 
 const userStatusMap: Map<string, KakaoUserStatus> = new Map<
   string,
@@ -24,6 +26,7 @@ const userLevelMap: Map<string, KakaoUserLevel> = new Map<
   KakaoUserLevel
 >([['신입', KakaoUserLevel.Newbie]]);
 
+@Injectable()
 export class MentionByStatusCommand extends KakaoOpenCommand {
   constructor() {
     super({

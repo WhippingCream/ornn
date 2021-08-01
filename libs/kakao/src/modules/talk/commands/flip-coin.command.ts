@@ -5,8 +5,11 @@ import {
   TalkChannel,
   TalkChatData,
 } from 'node-kakao';
+
+import { Injectable } from '@nestjs/common';
 import { KakaoCommand } from './base.command';
 
+@Injectable()
 export class CoinFlipCommand extends KakaoCommand {
   constructor() {
     super({
