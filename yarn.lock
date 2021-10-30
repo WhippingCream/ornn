@@ -1757,10 +1757,10 @@ bser@2.1.1:
   dependencies:
     node-int64 "^0.4.0"
 
-bson@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/bson/-/bson-4.2.2.tgz#ac01bb32b8ab30839550b98e0f44fced931df75d"
-  integrity sha512-9fX257PVHAUpiRGmY3356RVWKQxLA73BgjA/x5MGuJkTEMeG7yzjuBrsiFB67EXRJnFVKrbJY9t/M+oElKYktQ==
+bson@^4.4.1:
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/bson/-/bson-4.5.3.tgz#de3783b357a407d935510beb1fbb285fef43bb06"
+  integrity sha512-qVX7LX79Mtj7B3NPLzCfBiCP6RAsjiV8N63DjlaVVpZW+PFoDTxQ4SeDbSpcqgE6mXksM5CAwZnXxxxn/XwC0g==
   dependencies:
     buffer "^5.6.0"
 
@@ -3227,10 +3227,10 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-hash-wasm@^4.4.1:
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/hash-wasm/-/hash-wasm-4.4.1.tgz#9b09b728ab17c2f312639c044ac6f4f98496a090"
-  integrity sha512-6hbcJY74kQQOAoDQZgm0rku51jlf0f3+g+q+1CI3vNvabF27SQuVJm86FnMNMaw8WEjBeW4U5GWX1KsKd8qZCw==
+hash-wasm@^4.8.0:
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/hash-wasm/-/hash-wasm-4.9.0.tgz#7e9dcc9f7d6bd0cc802f2a58f24edce999744206"
+  integrity sha512-7SW7ejyfnRxuOc7ptQHSf4LDoZaWOivfzqw+5rpcQku0nHfmicPKE51ra9BiRLAmT8+gGLestr1XroUkqdjL6w==
 
 highlight.js@^10.0.0:
   version "10.6.0"
@@ -4689,16 +4689,16 @@ node-int64@^0.4.0:
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
   integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
-node-kakao@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/node-kakao/-/node-kakao-4.3.0.tgz#133b1c9fa8b9b1783afec3567d18df0c3283d095"
-  integrity sha512-P5HI+LNtV7/EfiQl+ixzOdCysv8ghSnepCA9zTUveslaGaMuGkOEbNvVM7dgQfPKKyJFt46dYck3zOmdczsAMA==
+node-kakao@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/node-kakao/-/node-kakao-4.4.0.tgz#22fd6a9ff5840df22d6fcfba3f0d61ab1a63f4c2"
+  integrity sha512-VDYz5b8Z1WV5q64ZxfrFvECs4PW2t+H/H7rw+VACXXE7sRm9CvyW70TXeaQ8L45Qg51wCHIGgtgWRQcdL4ndcA==
   dependencies:
     axios "^0.21.1"
-    bson "^4.2.2"
+    bson "^4.4.1"
     eventemitter3 "^4.0.7"
     form-data "^4.0.0"
-    hash-wasm "^4.4.1"
+    hash-wasm "^4.8.0"
     lossless-json "^1.0.3"
     node-forge "^0.10.0"
     promise-socket "^7.0.0"

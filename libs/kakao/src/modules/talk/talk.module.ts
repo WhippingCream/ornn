@@ -5,7 +5,7 @@ import { KakaoTalkCommandModule } from './commands/commands.module';
 import { KakaoTalkController } from './talk.controller';
 import { KakaoTalkService } from './talk.service';
 import { Module } from '@nestjs/common';
-import { OrnnRedisModule } from '@lib/redis';
+import { PartyModule } from '@lib/party';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WebhookModule } from '@lib/utils/webhook/webhook.module';
 
@@ -16,7 +16,7 @@ import { WebhookModule } from '@lib/utils/webhook/webhook.module';
       envFilePath: [`.envs/${process.env.NODE_ENV || 'development'}.env`],
     }),
     WebhookModule,
-    OrnnRedisModule,
+    PartyModule,
     KakaoTalkCommandModule,
   ],
   controllers: [KakaoTalkController],

@@ -4,19 +4,19 @@ import { Cron } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
 import { Injectable } from '@nestjs/common';
 import { KakaoTalkService } from './talk.service';
-import { PartyManagerService } from '@lib/redis/party.service';
+import { PartyManagerService } from '@lib/party';
 
 @Injectable()
 export class KakaoTalkAlertService {
   constructor(
     private readonly talkService: KakaoTalkService,
-    private readonly partyService: PartyManagerService,
+    private readonly partyManagerService: PartyManagerService,
   ) {}
 
   @Cron('1 */1 * * * *') // every minutes
   async partyMonitor() {
     for (const channel of this.talkService.client.channelList.all()) {
-      const parties = await this.partyService.getAll(
+      const parties = await this.partyManagerService.getAll(
         channel.channelId.toString(),
       );
 
@@ -24,8 +24,6 @@ export class KakaoTalkAlertService {
         const diffNowMillis = DateTime.fromISO(party.startedAt)
           .diffNow()
           .valueOf();
-
-        console.log(party.name, diffNowMillis);
 
         // if (diffNowMillis > 240000 && diffNowMillis <= 300000) {
         if (diffNowMillis > 60000 && diffNowMillis <= 120000) {

@@ -47,6 +47,7 @@ export class Party implements IParty {
     this.startedAt = startedAt.toISO().toString();
     this.users = users || [];
   }
+
   getLimit() {
     switch (this.type) {
       case 'Custom02':
@@ -106,50 +107,16 @@ export class Party implements IParty {
     }
   }
 
-  userAdd(id: string, nickname: string) {
-    if (this.users.find((user) => user.id === id)) return false;
-
-    this.users.push({
-      id,
-      nickname,
-      joinedAt: DateTime.now().toISO().toString(),
-    });
-
-    return true;
-  }
-
-  userDel(id: string) {
-    const idx = this.users.findIndex((user) => user.id === id);
-    if (idx === -1) return false;
-
-    this.users.splice(idx, 1);
-
-    return true;
-  }
-
-  userDelByIdx(idx: number) {
-    if (idx > this.users.length || idx === 0) return false;
-
-    this.users.splice(idx - 1, 1);
-
-    return true;
-  }
-
-  toString(verbose?: boolean) {
+  toString(options: { participants: boolean } = { participants: false }) {
     const title = `[${this.convertPartyQueueTypeToString()}] ${this.name} (${
       this.users.length
-    }/${this.getLimit()})`;
+    }/${this.getLimit()}) ${DateTime.fromISO(this.startedAt).toFormat(
+      'HH:mm',
+    )}`;
 
-    if (!verbose) return title;
+    if (!options.participants) return title;
     return [title]
-      .concat(
-        this.users.map(
-          (user, idx) =>
-            ` - [${idx + 1} / ${idx + 1 > this.getLimit() ? '⏳' : '✅'}] ${
-              user.nickname
-            }`,
-        ),
-      )
+      .concat(this.users.map((user, idx) => ` - [${idx + 1}] ${user.nickname}`))
       .join('\n');
   }
 
@@ -179,5 +146,51 @@ export class Party implements IParty {
     const { type, startedAt, users }: IParty = JSON.parse(data) as IParty;
 
     return new Party(name, type, DateTime.fromISO(startedAt), users);
+  }
+
+  static parsePartyQueueType(typeString: string) {
+    switch (typeString) {
+      case '2':
+        return 'Custom02';
+      case '3':
+        return 'Custom03';
+      case '4':
+        return 'Custom04';
+      case '5':
+        return 'Custom05';
+      case '6':
+        return 'Custom06';
+      case '7':
+        return 'Custom07';
+      case '8':
+        return 'Custom08';
+      case '9':
+        return 'Custom09';
+      case '10':
+        return 'Custom10';
+      case '일반':
+      case '노말':
+        return 'Normal';
+      case '솔랭':
+      case '듀오':
+        return 'SoloRank';
+      case '자랭':
+        return 'FreeRank';
+      case '칼바':
+      case '칼바람':
+        return 'HowlingAbyss';
+      case '내전':
+        return 'FriendlyMatch';
+      case '스크림':
+      case '외전':
+      case '친선':
+        return 'Scrimmage';
+      case '롤체':
+      case 'tft':
+      case '롤토체스':
+        return 'TeamFightTactics';
+      default:
+        return null;
+    }
   }
 }

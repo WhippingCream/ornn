@@ -1,15 +1,12 @@
 import * as dayjs from 'dayjs';
 
+import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import {
-  ChatBuilder,
-  KnownChatType,
   OpenChannelUserInfo,
   OpenChannelUserPerm,
-  ReplyContent,
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
-import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 
 import { CONNECTION } from '@lib/db/constants/connection';
 import { Injectable } from '@nestjs/common';
@@ -46,12 +43,7 @@ export class SyncChannelCommand extends KakaoOpenCommand {
     });
 
     if (!channelRow) {
-      return channel.sendChat(
-        new ChatBuilder()
-          .append(new ReplyContent(data.chat))
-          .text(`등록되지 않은 채널(${channel.getDisplayName()}) 입니다.`)
-          .build(KnownChatType.REPLY),
-      );
+      return `등록되지 않은 채널(${channel.getDisplayName()}) 입니다.`;
     }
 
     const currentDate = dayjs().toDate();
@@ -110,11 +102,6 @@ export class SyncChannelCommand extends KakaoOpenCommand {
       }
     }
 
-    return channel.sendChat(
-      new ChatBuilder()
-        .append(new ReplyContent(data.chat))
-        .text('동기화 성공!')
-        .build(KnownChatType.REPLY),
-    );
+    return '동기화 성공!';
   };
 }

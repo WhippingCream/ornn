@@ -1,11 +1,3 @@
-import {
-  ChatBuilder,
-  KnownChatType,
-  ReplyContent,
-  TalkChannel,
-  TalkChatData,
-} from 'node-kakao';
-
 import { Injectable } from '@nestjs/common';
 import { KakaoCommand } from './base.command';
 
@@ -23,12 +15,5 @@ export class CoinFlipCommand extends KakaoCommand {
     });
   }
 
-  execute = (data: TalkChatData, channel: TalkChannel) => {
-    return channel.sendChat(
-      new ChatBuilder()
-        .append(new ReplyContent(data.chat))
-        .text(Math.round(Math.random()) ? '앞면' : '뒷면')
-        .build(KnownChatType.REPLY),
-    );
-  };
+  execute = () => (Math.round(Math.random()) ? '앞면' : '뒷면');
 }

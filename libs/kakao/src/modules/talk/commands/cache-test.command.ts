@@ -1,14 +1,8 @@
-import { COMMAND_ARGUMENT_TYPE, KakaoCommand } from './base.command';
-import {
-  ChatBuilder,
-  KnownChatType,
-  ReplyContent,
-  TalkChannel,
-  TalkChatData,
-} from 'node-kakao';
+import { TalkChannel, TalkChatData } from 'node-kakao';
 
 import { CacheService } from '@lib/redis';
 import { Injectable } from '@nestjs/common';
+import { KakaoCommand } from './base.command';
 
 @Injectable()
 export class CacheCommand extends KakaoCommand {
@@ -23,27 +17,13 @@ export class CacheCommand extends KakaoCommand {
         '/캐시 읽기 K',
         ' - K: 키',
       ].join('\n'),
-      argOptions: [
-        {
-          type: COMMAND_ARGUMENT_TYPE.STRING,
-          optional: false,
-        },
-        {
-          type: COMMAND_ARGUMENT_TYPE.STRING,
-          optional: false,
-        },
-        {
-          type: COMMAND_ARGUMENT_TYPE.STRING,
-          optional: true,
-        },
-      ],
     });
   }
 
   execute = async (
     data: TalkChatData,
     channel: TalkChannel,
-    args: [string, string, string],
+    args: string[],
   ) => {
     let result = '';
     switch (args[0]) {
@@ -61,11 +41,6 @@ export class CacheCommand extends KakaoCommand {
         break;
     }
 
-    return channel.sendChat(
-      new ChatBuilder()
-        .append(new ReplyContent(data.chat))
-        .text(result)
-        .build(KnownChatType.REPLY),
-    );
+    return result;
   };
 }

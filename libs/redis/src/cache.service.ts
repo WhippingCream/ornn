@@ -6,7 +6,7 @@ import { RedisService } from 'nestjs-redis';
 export class CacheService {
   client: Redis;
   constructor(private readonly redisService: RedisService) {
-    this.client = this.redisService.getClient('cache');
+    this.client = this.redisService.getClient();
   }
 
   set(key: string, value: string) {

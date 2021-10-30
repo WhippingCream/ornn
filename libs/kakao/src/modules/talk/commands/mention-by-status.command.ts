@@ -1,10 +1,8 @@
-import { COMMAND_ARGUMENT_TYPE, KakaoOpenCommand } from './base.command';
 import {
   ChatBuilder,
   KnownChatType,
   MentionContent,
   OpenChannelUserPerm,
-  ReplyContent,
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
@@ -13,6 +11,7 @@ import { KakaoUserLevel, KakaoUserStatus } from '@lib/utils/enumerations';
 import { CONNECTION } from '@lib/db/constants/connection';
 import { Injectable } from '@nestjs/common';
 import { KakaoChannelsEntity } from '@lib/db/entities/kakao/channel.entity';
+import { KakaoOpenCommand } from './base.command';
 import { KakaoUsersEntity } from '@lib/db/entities/kakao/user.entity';
 import { getManager } from 'typeorm';
 
@@ -32,16 +31,6 @@ export class MentionByStatusCommand extends KakaoOpenCommand {
     super({
       command: 'mention-by-type-room',
       aliases: ['조건부호출'],
-      argOptions: [
-        {
-          type: COMMAND_ARGUMENT_TYPE.STRING,
-          optional: false,
-        },
-        {
-          type: COMMAND_ARGUMENT_TYPE.STRING,
-          optional: false,
-        },
-      ],
       roles: [OpenChannelUserPerm.OWNER, OpenChannelUserPerm.MANAGER],
       helpMessage: `/조건부호출 M N\n - M: 타입(신입, 휴면)\n - N:전달할 메시지`,
     });
@@ -54,12 +43,7 @@ export class MentionByStatusCommand extends KakaoOpenCommand {
   ) => {
     const typeName = args[0];
     if (!userStatusMap.has(typeName) || !userLevelMap.has(typeName)) {
-      return channel.sendChat(
-        new ChatBuilder()
-          .append(new ReplyContent(data.chat))
-          .text(`올바른 타입을 입력해 주세요.\n${this.helpMessage}`)
-          .build(KnownChatType.REPLY),
-      );
+      return `올바른 타입을 입력해 주세요.\n${this.helpMessage}`;
     }
 
     const chatBuilder = new ChatBuilder().text(
@@ -70,52 +54,38 @@ export class MentionByStatusCommand extends KakaoOpenCommand {
     const targetLevel: KakaoUserLevel =
       userLevelMap.get(typeName) ?? KakaoUserLevel.Member;
 
-    try {
-      const manager = getManager(CONNECTION.DEFAULT_NAME);
+    const manager = getManager(CONNECTION.DEFAULT_NAME);
 
-      const channelRepository = await manager.getRepository(
-        KakaoChannelsEntity,
-      );
-      const channelEntity = await channelRepository.findOne({
-        where: { kakaoId: channel.channelId.toString() },
-      });
+    const channelRepository = await manager.getRepository(KakaoChannelsEntity);
+    const channelEntity = await channelRepository.findOne({
+      where: { kakaoId: channel.channelId.toString() },
+    });
 
-      if (!channelEntity) {
-        return channel.sendChat(
-          new ChatBuilder()
-            .append(new ReplyContent(data.chat))
-            .text(`등록되지 않은 채널(${channel.getDisplayName()}) 입니다.`)
-            .build(KnownChatType.REPLY),
-        );
-      }
-
-      const userRepository = await manager.getRepository(KakaoUsersEntity);
-      const users = await userRepository.find({
-        where: { channelId: channelEntity.id },
-        relations: ['channel'],
-      });
-
-      for (const user of channel.getAllUserInfo()) {
-        if (
-          users.findIndex(
-            (elem) =>
-              elem.kakaoId == user.userId.toBigInt() &&
-              elem.status == targetStatus &&
-              elem.level == targetLevel,
-          ) != -1
-        ) {
-          chatBuilder.append(new MentionContent(user)).text(' ');
-        }
-      }
-    } catch (e) {
-      return channel.sendChat(
-        new ChatBuilder()
-          .append(new ReplyContent(data.chat))
-          .text(e.message)
-          .build(KnownChatType.REPLY),
-      );
+    if (!channelEntity) {
+      return `등록되지 않은 채널(${channel.getDisplayName()}) 입니다.`;
     }
 
-    return channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
+    const userRepository = await manager.getRepository(KakaoUsersEntity);
+    const users = await userRepository.find({
+      where: { channelId: channelEntity.id },
+      relations: ['channel'],
+    });
+
+    for (const user of channel.getAllUserInfo()) {
+      if (
+        users.findIndex(
+          (elem) =>
+            elem.kakaoId == user.userId.toBigInt() &&
+            elem.status == targetStatus &&
+            elem.level == targetLevel,
+        ) != -1
+      ) {
+        chatBuilder.append(new MentionContent(user)).text(' ');
+      }
+    }
+
+    channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
+
+    return null;
   };
 }

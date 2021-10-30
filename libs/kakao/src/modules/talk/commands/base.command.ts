@@ -1,34 +1,16 @@
+import { CommonDate, CommonTime } from '@lib/utils/interfaces';
 import {
-  AsyncCommandResult,
-  Chatlog,
   OpenChannelUserPerm,
   TalkChannel,
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
-import { CommonDate, CommonTime } from '@lib/utils/interfaces';
-
-export enum COMMAND_ARGUMENT_TYPE {
-  BOOLEAN = 'boolean',
-  STRING = 'string',
-  INTEGER = 'integer',
-  NUMBER = 'number',
-  DATE = 'date',
-  TIME = 'time',
-}
-
-interface CommandArgumentOption {
-  type: COMMAND_ARGUMENT_TYPE;
-  optional: boolean;
-
-  validationErrorMessage?: string;
-}
 
 interface KakaoCommandElements {
   command: string;
   aliases: string[];
   helpMessage?: string;
-  argOptions?: CommandArgumentOption[];
+  argOptions?: string[];
 }
 
 interface KakaoOpenCommandElements extends KakaoCommandElements {
@@ -45,13 +27,13 @@ export abstract class KakaoCommand {
   command: string;
   aliases?: string[];
   helpMessage?: string;
-  argOptions?: CommandArgumentOption[];
+  argOptions?: string[];
 
   abstract execute: (
     data: TalkChatData,
     channel: TalkChannel,
-    args: (string | number | boolean | CommonTime | CommonDate)[],
-  ) => AsyncCommandResult<Chatlog>;
+    args?: (string | number | boolean | CommonTime | CommonDate)[],
+  ) => string | null | Promise<string | null>;
 }
 
 export abstract class KakaoOpenCommand extends KakaoCommand {
@@ -63,6 +45,6 @@ export abstract class KakaoOpenCommand extends KakaoCommand {
   abstract execute: (
     data: TalkChatData,
     channel: TalkOpenChannel,
-    args: (string | number | boolean | CommonTime | CommonDate)[],
-  ) => AsyncCommandResult<Chatlog>;
+    args?: (string | number | boolean | CommonTime | CommonDate)[],
+  ) => string | null | Promise<string | null>;
 }

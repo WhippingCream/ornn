@@ -1,4 +1,5 @@
 import { ModelBaseController } from '@lib/db/base/base.controller';
+import { replyText } from '@lib/kakao/utils';
 import { DiscordWebhookService } from '@lib/utils/webhook/discord-webhook.service';
 import {
   BadRequestException,
@@ -33,7 +34,6 @@ import {
   Long,
   ChatBuilder,
   MentionContent,
-  ReplyContent,
   OpenChannelUserPerm,
 } from 'node-kakao';
 import { KakaoCredentialService } from '../credentials/credentials.service';
@@ -73,30 +73,21 @@ export class KakaoTalkController extends ModelBaseController {
             }
 
             if (isHelp) {
-              channel.sendChat(
-                new ChatBuilder()
-                  .append(new ReplyContent(data.chat))
-                  .text(
-                    command
-                      ? (command.helpMessage as string)
-                      : '없는 명령어 입니다.',
-                  )
-                  .build(KnownChatType.REPLY),
+              replyText(
+                channel,
+                data.chat,
+                command
+                  ? (command.helpMessage as string)
+                  : '없는 명령어 입니다.',
               );
             } else {
-              const verifiedArgs = this.talkService.validateCommandArguments(
-                command,
-                args,
-              );
-              command.execute(data, channel, verifiedArgs);
+              const result = await command.execute(data, channel, args);
+              if (result !== null) {
+                replyText(channel, data.chat, result);
+              }
             }
           } catch (err) {
-            channel.sendChat(
-              new ChatBuilder()
-                .append(new ReplyContent(data.chat))
-                .text(`⚠️ ${err.message}`)
-                .build(KnownChatType.REPLY),
-            );
+            replyText(channel, data.chat, `⚠️ ${err.message}`);
           }
         }
       },

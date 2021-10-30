@@ -55,6 +55,12 @@
       ],
       "@lib/ornn/*": [
         "libs/ornn/src/*"
+      ],
+      "@lib/party": [
+        "libs/party/src"
+      ],
+      "@lib/party/*": [
+        "libs/party/src/*"
       ]
     }
   }

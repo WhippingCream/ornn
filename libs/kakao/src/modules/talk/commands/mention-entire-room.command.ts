@@ -1,15 +1,14 @@
-import { COMMAND_ARGUMENT_TYPE, KakaoOpenCommand } from './base.command';
 import {
   ChatBuilder,
   KnownChatType,
   MentionContent,
   OpenChannelUserPerm,
-  ReplyContent,
   TalkChatData,
   TalkOpenChannel,
 } from 'node-kakao';
 
 import { Injectable } from '@nestjs/common';
+import { KakaoOpenCommand } from './base.command';
 
 @Injectable()
 export class MentionEntireRoomCommand extends KakaoOpenCommand {
@@ -17,14 +16,7 @@ export class MentionEntireRoomCommand extends KakaoOpenCommand {
     super({
       command: 'mention-entire-room',
       aliases: ['전체호출'],
-      argOptions: [
-        {
-          type: COMMAND_ARGUMENT_TYPE.STRING,
-          optional: false,
-          validationErrorMessage:
-            '메시지를 입력해 주세요.\n/전체호출 M\n - M: 전달할 메시지',
-        },
-      ],
+
       roles: [OpenChannelUserPerm.OWNER, OpenChannelUserPerm.MANAGER],
       helpMessage: '/전체호출 M\n - M: 전달할 메시지',
     });
@@ -37,19 +29,12 @@ export class MentionEntireRoomCommand extends KakaoOpenCommand {
   ) => {
     const chatBuilder = new ChatBuilder().text(`${args[0]}\n\n`);
 
-    try {
-      for (const user of channel.getAllUserInfo()) {
-        chatBuilder.append(new MentionContent(user)).text(' ');
-      }
-    } catch (e) {
-      return channel.sendChat(
-        new ChatBuilder()
-          .append(new ReplyContent(data.chat))
-          .text(e.message)
-          .build(KnownChatType.REPLY),
-      );
+    for (const user of channel.getAllUserInfo()) {
+      chatBuilder.append(new MentionContent(user)).text(' ');
     }
 
-    return channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
+    channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
+
+    return null;
   };
 }
