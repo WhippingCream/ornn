@@ -1,12 +1,10 @@
-import {
-  ChatBuilder,
-  KnownChatType,
-  ReplyContent,
-  TalkChannel,
-  TalkChatData,
-} from 'node-kakao';
-import { COMMAND_ARGUMENT_TYPE, KakaoCommand } from './base.command';
+import { TalkChannel, TalkChatData } from 'node-kakao';
 
+import { Injectable } from '@nestjs/common';
+import { KakaoCommand } from './base.command';
+import { converters } from '@lib/kakao/utils';
+
+@Injectable()
 export class DiceCommand extends KakaoCommand {
   constructor() {
     super({
@@ -19,25 +17,17 @@ export class DiceCommand extends KakaoCommand {
         ' - N: 1보다 큰 양의 정수',
         ' - 1부터 N 중 하나의 숫자가 나옵니다.',
       ].join('\n'),
-      argOptions: [
-        {
-          type: COMMAND_ARGUMENT_TYPE.INTEGER,
-          optional: true,
-          validationErrorMessage: [
-            '/주사위 N',
-            ' - N: 1보다 큰 양의 정수여야 합니다.',
-          ].join('\n'),
-        },
-      ],
     });
   }
 
-  execute = (data: TalkChatData, channel: TalkChannel, args: [number]) => {
+  execute = (data: TalkChatData, channel: TalkChannel, args: string[]) => {
     let max = 6;
 
-    if (args[0]) {
-      if (args[0] > 1) {
-        max = args[0];
+    const num = converters.str2num(args[0]);
+
+    if (num !== null) {
+      if (num > 1) {
+        max = num;
       }
     }
 
@@ -72,11 +62,6 @@ export class DiceCommand extends KakaoCommand {
       }
     }
 
-    return channel.sendChat(
-      new ChatBuilder()
-        .append(new ReplyContent(data.chat))
-        .text(result)
-        .build(KnownChatType.REPLY),
-    );
+    return result;
   };
 }

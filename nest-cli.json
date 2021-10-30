@@ -88,6 +88,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/ornn/tsconfig.lib.json"
       }
+    },
+    "party": {
+      "type": "library",
+      "root": "libs/party",
+      "entryFile": "index",
+      "sourceRoot": "libs/party/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/party/tsconfig.lib.json"
+      }
     }
   }
 }
