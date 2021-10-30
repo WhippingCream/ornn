@@ -1,8 +1,11 @@
 import { ConfigModule } from '@nestjs/config';
 import { KakaoCredentialService } from '../credentials/credentials.service';
+import { KakaoTalkAlertService } from './talk-alert.service';
+import { KakaoTalkCommandModule } from './commands/commands.module';
 import { KakaoTalkController } from './talk.controller';
 import { KakaoTalkService } from './talk.service';
 import { Module } from '@nestjs/common';
+import { PartyModule } from '@lib/party';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WebhookModule } from '@lib/utils/webhook/webhook.module';
 
@@ -13,8 +16,10 @@ import { WebhookModule } from '@lib/utils/webhook/webhook.module';
       envFilePath: [`.envs/${process.env.NODE_ENV || 'development'}.env`],
     }),
     WebhookModule,
+    PartyModule,
+    KakaoTalkCommandModule,
   ],
   controllers: [KakaoTalkController],
-  providers: [KakaoTalkService, KakaoCredentialService],
+  providers: [KakaoTalkService, KakaoCredentialService, KakaoTalkAlertService],
 })
 export class KakaoTalkModule {}
