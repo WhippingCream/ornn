@@ -24,6 +24,7 @@ import { PartyJoinCommand } from './commands/party-join.command';
 import { PartyKickCommand } from './commands/party-kick.command';
 import { PartyListCommand } from './commands/party-list.command';
 import { PartyNameCommand } from './commands/party-name.command';
+import { PartySubstituteCommand } from './commands/party-substitute.command';
 import { PartyTimeCommand } from './commands/party-time.command';
 import { PartyTypeCommand } from './commands/party-type.command';
 import { RegisterChannelCommand } from './commands/register-channel.command';
@@ -53,6 +54,7 @@ export class KakaoTalkService {
     protected readonly partyCreateCommand: PartyCreateCommand,
     protected readonly partyJoinCommand: PartyJoinCommand,
     protected readonly partyExitCommand: PartyExitCommand,
+    protected readonly partySubstituteCommand: PartySubstituteCommand,
     protected readonly partyKickCommand: PartyKickCommand,
     protected readonly partyNameCommand: PartyNameCommand,
     protected readonly partyTimeCommand: PartyTimeCommand,
@@ -72,6 +74,7 @@ export class KakaoTalkService {
       this.partyCreateCommand,
       this.partyJoinCommand,
       this.partyExitCommand,
+      this.partySubstituteCommand,
       this.partyKickCommand,
       this.partyNameCommand,
       this.partyTimeCommand,

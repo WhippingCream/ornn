@@ -48,29 +48,29 @@ export class KakaoTalkAlertService {
           channel.sendChat(chatBuilder.build(KnownChatType.TEXT));
         }
 
-        if (
-          diffNowMillis > 0 &&
-          diffNowMillis <= 60000 &&
-          party.type === 'FriendlyMatch'
-        ) {
-          channel.sendChat(
-            new ChatBuilder()
-              .text(
-                `/자동매칭 ${party.users
-                  .filter((user, idx) => idx < party.getLimit())
-                  .map((user) => user.nickname.split('/')[0])
-                  .join(',')}`,
-              )
-              .build(KnownChatType.TEXT),
-          );
-          channel.sendChat(
-            new ChatBuilder()
-              .text(
-                '※닉네임 뒤에 @1, @2를 붙이면 팀을 미리 나눌 수 있습니다.\nEx. /자동매칭 ZeroBoom@1,버스타는고먐미@2,캇셀프라임,잠탱이다, ...\n가능하면 서폿이랑 정글은 미리 나누고 하시면 밸런스 맞추는데 도움이 됩니다!',
-              )
-              .build(KnownChatType.TEXT),
-          );
-        }
+        // if (
+        //   diffNowMillis > 0 &&
+        //   diffNowMillis <= 60000 &&
+        //   party.type === 'FriendlyMatch'
+        // ) {
+        //   channel.sendChat(
+        //     new ChatBuilder()
+        //       .text(
+        //         `/자동매칭 ${party.users
+        //           .filter((user, idx) => idx < party.getLimit())
+        //           .map((user) => user.nickname.split('/')[0])
+        //           .join(',')}`,
+        //       )
+        //       .build(KnownChatType.TEXT),
+        //   );
+        //   channel.sendChat(
+        //     new ChatBuilder()
+        //       .text(
+        //         '※닉네임 뒤에 @1, @2를 붙이면 팀을 미리 나눌 수 있습니다.\nEx. /자동매칭 ZeroBoom@1,버스타는고먐미@2,캇셀프라임,잠탱이다, ...\n가능하면 서폿이랑 정글은 미리 나누고 하시면 밸런스 맞추는데 도움이 됩니다!',
+        //       )
+        //       .build(KnownChatType.TEXT),
+        //   );
+        // }
       }
     }
   }

@@ -1,6 +1,8 @@
 import { Party, PartyQueueType } from './party.type';
 import { PartyError, PartyErrorCode } from './party.errors';
 
+import { ConfigService } from '@nestjs/config';
+import { Cron } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
 import { Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
@@ -9,8 +11,47 @@ import { RedisService } from 'nestjs-redis';
 @Injectable()
 export class PartyRepositoryService {
   client: Redis;
-  constructor(private readonly redisService: RedisService) {
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly configService: ConfigService,
+  ) {
     this.client = this.redisService.getClient();
+  }
+
+  @Cron('0 */5 * * * *') // every 5 minutes
+  async removeExpired() {
+    const keyPrefix =
+      this.configService.get('REDIS_PARTY_PREFIX') || 'ORNN_PARTY_DEV@';
+
+    const channels = (await this.client.keys(`${keyPrefix}*`)).map((keys) =>
+      keys.slice(keyPrefix.length),
+    );
+
+    for (const channel of channels) {
+      const partyListData = await this.client.hgetall(channel);
+
+      const partyList = Object.entries(partyListData).map(([name, data]) =>
+        Party.deserialize(name, data),
+      );
+
+      console.log(
+        channel,
+        partyList.map((party) => party.name),
+      );
+
+      for (const party of partyList) {
+        const diffNowMillis = DateTime.fromISO(party.startedAt)
+          .toLocal()
+          .diffNow()
+          .valueOf();
+
+        // 1시간 경과된 파티 삭제/파티생 테스트
+        if (diffNowMillis < 0) {
+          // if (diffNowMillis < -3600000) {
+          this.client.hdel(channel, party.name);
+        }
+      }
+    }
   }
 
   async getAll(channel: string) {
@@ -22,18 +63,6 @@ export class PartyRepositoryService {
     const partyList = Object.entries(partyListData).map(([name, data]) =>
       Party.deserialize(name, data),
     );
-
-    for (const party of partyList) {
-      const diffNowMillis = DateTime.fromISO(party.startedAt)
-        .toLocal()
-        .diffNow()
-        .valueOf();
-
-      // 1시간 경과된 파티 삭제
-      if (diffNowMillis < -3600000) {
-        this.client.hdel(channel, party.name);
-      }
-    }
 
     partyList.sort((a, b) =>
       DateTime.fromISO(a.startedAt)
