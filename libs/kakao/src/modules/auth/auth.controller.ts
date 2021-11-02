@@ -102,7 +102,6 @@ export class KakaoAuthController extends ModelBaseController {
       const loginForm = {
         email: credential.email,
         password: credential.password,
-        forced: true,
       };
 
       const res = await this.authService.client.registerDevice(

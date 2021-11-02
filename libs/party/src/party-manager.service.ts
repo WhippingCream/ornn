@@ -52,7 +52,7 @@ export class PartyManagerService {
       const diffNowMills = DateTime.fromISO(party.startedAt)
         .diffNow()
         .valueOf();
-      if (diffNowMills > 0 && diffNowMills < 180000) {
+      if (diffNowMills > 0 && diffNowMills < 1800000) {
         throw new PartyError(400, PartyErrorCode.FriendlyMatchExitTimeOver);
       }
     }
