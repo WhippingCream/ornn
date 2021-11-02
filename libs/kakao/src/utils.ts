@@ -91,6 +91,12 @@ const str2numConverter = (src: string): number => {
 };
 
 const str2timeConverter = (src: string): CommonTime => {
+  if (src.indexOf(':') > -1 && /^([01]\d|2[0-3])[0-5]\d$/.test(src)) {
+    const hour = src.slice(0, 2);
+    const minute = src.slice(2, 4);
+    return { hour: parseInt(hour, 10), minute: parseInt(minute, 10) };
+  }
+
   // HH:mm
   if (/^([01]\d|2[0-3]):([0-5]\d)$/.test(src)) {
     const [hour, minute] = src.split(':');

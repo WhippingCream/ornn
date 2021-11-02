@@ -18,7 +18,14 @@ import { DiceCommand } from './commands/dice.command';
 import { GetReadersCommand } from './commands/get-readers.command';
 import { MentionByStatusCommand } from './commands/mention-by-status.command';
 import { MentionEntireRoomCommand } from './commands/mention-entire-room.command';
-import { PartyCommand } from './commands/party.command';
+import { PartyCreateCommand } from './commands/party-create.command';
+import { PartyExitCommand } from './commands/party-exit.command';
+import { PartyJoinCommand } from './commands/party-join.command';
+import { PartyKickCommand } from './commands/party-kick.command';
+import { PartyListCommand } from './commands/party-list.command';
+import { PartyNameCommand } from './commands/party-name.command';
+import { PartyTimeCommand } from './commands/party-time.command';
+import { PartyTypeCommand } from './commands/party-type.command';
 import { RegisterChannelCommand } from './commands/register-channel.command';
 import { SyncChannelCommand } from './commands/sync-channel.command';
 import { findOpenSender } from '@lib/kakao/utils';
@@ -42,7 +49,14 @@ export class KakaoTalkService {
     protected readonly syncChannelCommand: SyncChannelCommand,
     protected readonly mentionEntireRoomCommand: MentionEntireRoomCommand,
     protected readonly mentionByStatusCommand: MentionByStatusCommand,
-    protected readonly partyCommand: PartyCommand,
+    protected readonly partyListCommand: PartyListCommand,
+    protected readonly partyCreateCommand: PartyCreateCommand,
+    protected readonly partyJoinCommand: PartyJoinCommand,
+    protected readonly partyExitCommand: PartyExitCommand,
+    protected readonly partyKickCommand: PartyKickCommand,
+    protected readonly partyNameCommand: PartyNameCommand,
+    protected readonly partyTimeCommand: PartyTimeCommand,
+    protected readonly partyTypeCommand: PartyTypeCommand,
   ) {
     this.client = new TalkClient();
     this.commands = [
@@ -54,7 +68,14 @@ export class KakaoTalkService {
       this.syncChannelCommand,
       this.mentionEntireRoomCommand,
       this.mentionByStatusCommand,
-      this.partyCommand,
+      this.partyListCommand,
+      this.partyCreateCommand,
+      this.partyJoinCommand,
+      this.partyExitCommand,
+      this.partyKickCommand,
+      this.partyNameCommand,
+      this.partyTimeCommand,
+      this.partyTypeCommand,
     ];
     this.commandMap = new Map<string, KakaoCommand>();
 

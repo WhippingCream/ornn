@@ -22,11 +22,12 @@ export class KakaoTalkAlertService {
 
       for (const party of parties) {
         const diffNowMillis = DateTime.fromISO(party.startedAt)
+          .toLocal()
           .diffNow()
           .valueOf();
 
-        // if (diffNowMillis > 240000 && diffNowMillis <= 300000) {
-        if (diffNowMillis > 60000 && diffNowMillis <= 120000) {
+        if (diffNowMillis > 240000 && diffNowMillis <= 300000) {
+          // if (diffNowMillis > 60000 && diffNowMillis <= 120000) {
           const chatBuilder = new ChatBuilder().text(
             `'${party.name}' 파티가 곧 시작합니다.\n\n`,
           );
