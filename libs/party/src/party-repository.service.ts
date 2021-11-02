@@ -25,6 +25,7 @@ export class PartyRepositoryService {
 
     for (const party of partyList) {
       const diffNowMillis = DateTime.fromISO(party.startedAt)
+        .toLocal()
         .diffNow()
         .valueOf();
 
