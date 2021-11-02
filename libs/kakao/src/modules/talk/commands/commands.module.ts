@@ -13,6 +13,7 @@ import { PartyKickCommand } from './party-kick.command';
 import { PartyListCommand } from './party-list.command';
 import { PartyModule } from '@lib/party';
 import { PartyNameCommand } from './party-name.command';
+import { PartySubstituteCommand } from './party-substitute.command';
 import { PartyTimeCommand } from './party-time.command';
 import { PartyTypeCommand } from './party-type.command';
 import { RegisterChannelCommand } from './register-channel.command';
@@ -33,6 +34,7 @@ import { SyncChannelCommand } from './sync-channel.command';
     PartyCreateCommand,
     PartyJoinCommand,
     PartyExitCommand,
+    PartySubstituteCommand,
     PartyKickCommand,
     PartyNameCommand,
     PartyTimeCommand,
@@ -51,6 +53,7 @@ import { SyncChannelCommand } from './sync-channel.command';
     PartyCreateCommand,
     PartyJoinCommand,
     PartyExitCommand,
+    PartySubstituteCommand,
     PartyKickCommand,
     PartyNameCommand,
     PartyTimeCommand,

@@ -50,6 +50,7 @@ export class PartyManagerService {
 
     if (party.type === 'FriendlyMatch') {
       const diffNowMills = DateTime.fromISO(party.startedAt)
+        .toLocal()
         .diffNow()
         .valueOf();
       if (diffNowMills > 0 && diffNowMills < 1800000) {
@@ -74,6 +75,38 @@ export class PartyManagerService {
     const user = party.users[index - 1];
 
     party.users.splice(index - 1, 1);
+
+    await this.repoService.update(channel, name, party);
+
+    return { party, user };
+  }
+
+  async replaceUser(
+    channel: string,
+    name: string,
+    index: number,
+    userId: string,
+    nickname: string,
+  ) {
+    const party = await this.repoService.getOne(channel, name);
+
+    if (index > party.users.length || index === 0) {
+      throw new PartyError(400, PartyErrorCode.PartyMemberIndexOutOfRange);
+    }
+
+    if (party.users.find((user) => user.id === userId)) {
+      throw new PartyError(400, PartyErrorCode.PartyMemberAlreadyJoined);
+    }
+
+    const user = party.users[index - 1];
+
+    party.users.splice(index - 1, 1);
+
+    party.users.push({
+      id: userId,
+      nickname,
+      joinedAt: DateTime.now().toISO().toString(),
+    });
 
     await this.repoService.update(channel, name, party);
 

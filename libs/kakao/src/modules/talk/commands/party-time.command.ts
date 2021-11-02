@@ -53,7 +53,11 @@ export class PartyTimeCommand extends KakaoOpenCommand {
     const party = await this.partyManagerService.updateTime(
       channel.info.channelId.toString(),
       name,
-      startedAt,
+      startedAt.diffNow().valueOf() <= 0
+        ? startedAt.plus({
+            day: 1,
+          })
+        : startedAt,
     );
 
     channel.sendChat(party.toString({ participants: false }));
